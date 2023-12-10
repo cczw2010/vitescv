@@ -1,0 +1,26 @@
+{
+  "name": "@vitescv/vuetify",
+  "version": "1.0.0",
+  "description": "vuetify module for vitescv",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./config": "./config.js",
+    "./components": "./esm.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "vuetify": "^2.7.1"
+  },
+  "devDependencies": {
+    "sass": "~1.32",
+    "sass-loader": "^13.3.2",
+    "vue": "^2.7.14"
+  }
+}

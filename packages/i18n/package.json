@@ -1,0 +1,17 @@
+{
+  "name": "@vitescv/i18n",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "description": "i18n module for vitescv",
+  "dependencies": {
+    "vue-i18n": "8"
+  },
+  "exports":{
+    ".":"./index.js",
+    "./config":"./config.js"
+  },
+  "devDependencies": {
+    "vue": "^2.7.14"
+  }
+}

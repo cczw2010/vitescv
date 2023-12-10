@@ -1,0 +1,24 @@
+{
+  "name": "@vitescv/pinia",
+  "version": "1.0.0",
+  "description": "pinia module for vitescv",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports":{
+    ".": "./index.js",
+    "./config": "./config.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vue": "^2.7.14"
+  },
+  "dependencies": {
+    "pinia": "^2.0.33",
+    "pinia-plugin-persistedstate": "^3.2.0"
+  }
+}

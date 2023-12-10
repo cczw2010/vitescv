@@ -1,0 +1,23 @@
+{
+  "name": "@vitescv/vuemeta",
+  "version": "1.0.0",
+  "description": "vue-meta module for vitescv",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./config": "./config.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "vue-meta": "^2.4.0"
+  },
+  "devDependencies": {
+    "vue": "^2.7.14"
+  }
+}

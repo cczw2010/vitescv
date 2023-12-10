@@ -1,0 +1,14 @@
+{
+  "name": "@vitescv/auth",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "auth module for vitescv",
+  "dependencies": {
+    "jsonwebtoken": "^9.0.0"
+  },
+  "devDependencies": {
+    
+  },
+  "peerDependencies": {
+  }
+}
