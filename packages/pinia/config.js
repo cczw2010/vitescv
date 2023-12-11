@@ -5,6 +5,6 @@
  * 关于Monorepo 和链接依赖,参考：https://cn.vitejs.dev/guide/dep-pre-bundling.html#monorepos-and-linked-dependencies
  */
 export default {
-  manualChunks:{'pinia': ['pinia','pinia-plugin-persistedstate']},
+  manualChunks:{'vpinia': ['pinia','pinia-plugin-persistedstate','@vitescv/pinia']},
 }
 

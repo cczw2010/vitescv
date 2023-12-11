@@ -19,5 +19,5 @@ export default {
     // }
   ],
   // 💡 扩展vite.config.js的rollupOptions.output.manualChunks设置项
-  manualChunks:{'vuetify': ['vuetify']},
+  manualChunks:{'vvuetify': ['vuetify','@vitescv/vuetify']},
 }

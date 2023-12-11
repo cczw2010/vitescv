@@ -6,6 +6,6 @@
  */
 export default {
   external:[],
-  manualChunks:{'vue-meta': ['vue-meta']},
+  manualChunks:{'vmeta': ['vue-meta','@vitescv/vuemeta']},
 }
 

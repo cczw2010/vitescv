@@ -14,7 +14,6 @@ userConfig.external =  userConfig.external ||[]
 userConfig.UIDirs = userConfig.UIDirs ||[]
 userConfig.UIResolvers =  userConfig.UIResolvers ||[]
 userConfig.buildCommonjsInclude =  userConfig.buildCommonjsInclude ||[]
-userConfig.optimizeDepsInput =  userConfig.optimizeDepsInput ||[]
 //💡 处理模块包 的扩展配置文件，这个文件目前是必须的。
 if(userConfig.modules){
   for (let moduleName in userConfig.modules) {
@@ -59,10 +58,6 @@ if(userConfig.modules){
         if(Array.isArray(moduleConfig.buildCommonjsInclude)){
           userConfig.buildCommonjsInclude = userConfig.buildCommonjsInclude.concat(moduleConfig.buildCommonjsInclude)
         }
-        if(Array.isArray(moduleConfig.optimizeDepsInput)){
-          userConfig.optimizeDepsInput = userConfig.optimizeDepsInput.concat(moduleConfig.optimizeDepsInput)
-        }
-
         // UIResolvers
         if(Array.isArray(moduleConfig.UIResolvers)){
           const resolverOption = moduleOption.resolver

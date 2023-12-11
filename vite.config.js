@@ -133,19 +133,19 @@ export default function(Config){
         //💡 览器兼容目标,使用plugin-legacy 就不用设置了
         // target:"modules",
       },
-      // 预构建，module开发中太多定制化，引发太多问题,所以虽然开启了，但是build.commonjsOptions.input只有开发下才处理
+      // 预构建还是关掉了，module开发中太多定制化，会引起各种问题，比如呗预构建载入了子包内的vue引起vue多实例，
       optimizeDeps:{
         //💡 除了input（index.html）文件来检测需要预构建的依赖项外，指定其他入口文件检索
         // entries:[],
         //💡 默认情况下，不在 node_modules 中的，链接的包不会被预构建。使用此选项可强制预构建链接的包。
         // include:[],
-        include:mode=='production'?[]:Config.optimizeDepsInput,
+        // include:mode=='production'?[]:Config.optimizeDepsInput,
         // 💡 排除的预构建，vitescv/app包含虚拟模块，预构建的时候并不存在，会报错
-        exclude:['vitescv/app'],      
+        // exclude:['vitescv/app','@vitescv/i18n'],
         //💡 设置为 true 可以强制依赖预构建，而忽略之前已经缓存过的、已经优化过的依赖。
         // force:true,
         //💡 禁用依赖优化，值为 true 将在构建和开发期间均禁用优化器。传 'build' 或 'dev' 将仅在其中一种模式下禁用优化器。默认情况下，仅在开发阶段启用依赖优化。
-        disabled:false,
+        disabled:true,
       },
       preview:{
         port:Config.port,
