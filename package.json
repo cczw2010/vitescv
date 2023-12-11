@@ -10,6 +10,12 @@
   "bin": {
     "vitescv": "./bin/cli.js"
   },
+  "files": [
+    "src",
+    "bin",
+    "tpl",
+    "vite.config.js"
+  ],
   "dependencies": {
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@vitejs/plugin-legacy": "^2.3.1",

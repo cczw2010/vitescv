@@ -1,8 +1,8 @@
-基于vite,vu2.7的 vue单文件组件开发模式渲染小脚手架(CSR)， 支持自定义模块,支持自动组件加载. 暂未正式发布
-
+基于vite,vu2.7的 vue单文件组件开发模式渲染小脚手架(CSR)， 支持自定义模块,支持自动组件加载.
 
 ### 使用
 
+**请使用`pnpm`管理包**
 ```js
 // ##########安装
 pnpm install vitescv
@@ -279,7 +279,7 @@ export default {
       }
     }
   ],
- // 💡 以下两项分别对应vite配置中的: build.commonjsOptions.input 和 optimizeDeps.input   仅在开发模式生效
+ // 💡 以下两项分别对应vite配置中的: build.commonjsOptions.input 和 optimizeDeps.input   仅在开发模式生效, 但是vitejs的预构建会引起一些问题，或者dev和build差异，尽量不要使用
   buildCommonjsInclude:['packagename'],
   optimizeDepsInput:['packagename'],
   // 💡 外部化的包
@@ -329,12 +329,9 @@ modules:{
 
 [@vitescv/pinia](./packages/pinia)
 
-
-
 ### TODO 中间件Middleware
 
 vue的路由中间件（路由守卫），可以在配置文件中配置对所有页面生效的全局`beforeEach`路由守卫: 
-**SSR**: 服务端页面首次访问初始化时只执行一次，客户端初始化和每次页面路由都会执行
 **CSR**:客户端初始化和每次页面路由都会执行
 
 *  路由文件

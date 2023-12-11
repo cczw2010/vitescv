@@ -1,5 +1,5 @@
 import { resolve} from "path"
-import { splitVendorChunkPlugin,defineConfig,searchForWorkspaceRoot} from 'vite'
+import { splitVendorChunkPlugin,defineConfig,loadEnv,searchForWorkspaceRoot} from 'vite'
 import {nodeResolve} from "@rollup/plugin-node-resolve"
 import legacy from '@vitejs/plugin-legacy'
 import vue from '@vitejs/plugin-vue2'
@@ -14,6 +14,7 @@ import { layoutNameKey,pageNameKey} from './src/constants.js'
 // 根据用户配置返回vite.config.js配置
 export default function(Config){
   return defineConfig(({ command, mode, ssrBuild }) => {
+    const env = loadEnv(mode, process.cwd(), '')
     return {
       //💡 项目根目录
       root:process.env.__PROJECTCACHEROOT,
@@ -125,7 +126,7 @@ export default function(Config){
             manualChunks: Object.assign({
               'vue': ['vue'],
               'vue-router': ['vue-router'],
-              'modules': ['virtual:modules'],
+              // 'vmodules': ['virtual:modules','virtual:router-routes','virtual:middlewares'],
             },Config.manualChunks),
           },
         },
