@@ -8,12 +8,12 @@ import { createRequire } from "module"
 const require = createRequire(import.meta.url)
 // @rollup/plugin-node-resolve   modulePaths项
 userConfig.resolveModulePath = userConfig.resolveModulePath ||[]
-// @rollup/plugin-node-resolve   modulePaths项
 userConfig.manualChunks =  userConfig.manualChunks || {}
 userConfig.external =  userConfig.external ||[]
 userConfig.UIDirs = userConfig.UIDirs ||[]
 userConfig.UIResolvers =  userConfig.UIResolvers ||[]
 userConfig.buildCommonjsInclude =  userConfig.buildCommonjsInclude ||[]
+userConfig.optimizeDepsExclude =  userConfig.optimizeDepsExclude ||[]
 //💡 处理模块包 的扩展配置文件，这个文件目前是必须的。
 if(userConfig.modules){
   for (let moduleName in userConfig.modules) {
@@ -22,6 +22,9 @@ if(userConfig.modules){
       console.error(`[vitescv] [${moduleName}] not exit`)
       continue
     }
+    // 统计记录要排除的模板module包，防止被预构建,因为可能存在模板
+    userConfig.optimizeDepsExclude.push(moduleName)
+
     let moduleDir = dirname(moduleIndex)
     try{
       let moduleOption = userConfig.modules[moduleName]||{}
@@ -42,8 +45,8 @@ if(userConfig.modules){
           console.error(`[${moduleName}] load config file fail!`)
           return null
         })
-      // console.debug(">>>>>>",moduleName,moduleConfig)
-      userConfig.resolveModulePath.push(join(moduleDir,'node_modules'))
+      // console.debug(">>>>>>",moduleName,moduleDir)
+      userConfig.resolveModulePath.push(moduleDir)
 
       if(moduleConfig){
         if(moduleConfig.manualChunks){

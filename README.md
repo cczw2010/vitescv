@@ -185,7 +185,7 @@ user/_id/posts.vue      # /user/:id/posts
 
 ### 自定义编译模块
 
-全局可编译vue module模块加载，在app创建期间调用，可用于加载一些定制的模块初始化。（开发第三方包过程中vite的预构建依赖优化选项引发了太多问题，所以直接关了）
+全局可编译vue module模块加载，在app创建期间调用，可用于加载一些定制的模块初始化。（开发第三方包过程中vite的预构建依赖优化选项引发了开发模式太多问题，持续优化）
 
 模块默认返回初始化方法，该方法接受用户设置参数对象，和一个应用上下文`context` ,可在应用运行生命周期注册钩子函数。可参考源码中`@vitescv/i18n` 和 `@vitescv/element-ui`模块。
 * **`钩子函数`**
@@ -224,7 +224,7 @@ user/_id/posts.vue      # /user/:id/posts
 
   * **cwd** 		          代表项目根目录(process.cwd())
   * **option**            对象是模块的自定义传入的参数对象,方便定制动态代码
-  * **utils**             对模板内提供了一些常用函数工具
+  * **utils**             对模板内提供了一些常用函数工具对象
   * **utils.normalPath**  vite的api，用于快平台处理url地址
   * **utils.resolve**     path的api
 
@@ -279,8 +279,6 @@ export default {
       }
     }
   ],
- // 💡 对应vite配置中的: build.commonjsOptions.include   仅在开发模式生效
-  buildCommonjsInclude:['packagename'],
   // 💡 外部化的包
   external:[],
   // 💡 扩展vite.config.js的rollupOptions.output.manualChunks设置项

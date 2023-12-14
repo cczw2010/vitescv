@@ -40,12 +40,12 @@ export default function (options) {
   // console.debug(hotmodules)
   return {
     name: 'vite-plugin-vue-modules',
-    enforce: 'post',
+    enforce: 'pre',
     configureServer(server) {
       hotmodules.forEach((module,id)=>{
-        // if(!module.isPackage){
+        if(!module.isPackage){
           server.watcher.add(id);
-        // }
+        }
       })
       server.watcher.on('change', (path, stats) => {
         // if (stats) console.log(`File ${path} changed size to ${stats.size}`);
@@ -81,8 +81,8 @@ export default function (options) {
     //   return true
     // },
     transform(code,id,option){
-      let moduleInfo = hotmodules.get(id)
-      // console.debug('[app] load module:',id,moduleInfo)
+      let moduleInfo = hotmodules.get(id.replace(/^\/@fs/,"").split("?v=")[0])
+      // console.debug('>>>>>>>>>[app] load module:',id,moduleInfo)
       if(moduleInfo){
         // 加载的其他子动态模块
         // console.debug('[app] load module:',moduleInfo)

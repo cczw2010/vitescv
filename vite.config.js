@@ -10,11 +10,11 @@ import vueOptions from "./src/vitePlugins/vite-plugin-vue-options.js"
 import vueMiddleware from "./src/vitePlugins/vite-plugin-vue-middleware.js"
 import vueModules from "./src/vitePlugins/vite-plugin-vue-modules.js"
 import { layoutNameKey,pageNameKey} from './src/constants.js'
-
+import commonjs from "@rollup/plugin-commonjs";
 // 根据用户配置返回vite.config.js配置
 export default function(Config){
   return defineConfig(({ command, mode, ssrBuild }) => {
-    const env = loadEnv(mode, process.cwd(), '')
+    // const env = loadEnv(mode, process.cwd(), '')
     return {
       //💡 项目根目录
       root:process.env.__PROJECTCACHEROOT,
@@ -33,7 +33,9 @@ export default function(Config){
         alias: {
           '@': process.env.__PROJECTROOT,
           '@@vitescv': process.env.__VITESCVROOT,
-        }
+        },
+        preserveSymlinks: false,
+        dedupe:["vue"]
       },
       plugins: [
         Config.legacy&&legacy(Object.assign({
@@ -41,10 +43,18 @@ export default function(Config){
         },Config.legacy)),
         // Inspect(),
         nodeResolve({
-          preserveSymlinks: true ,
+          preserveSymlinks: false ,
           // pnpm的话都在node_modules/.pnpm/node_modules下面
-          modulePaths:['node_modules/.pnpm/node_modules','node_modules',resolve(process.env.__VITESCVROOT,'node_modules')].concat(Config.resolveModulePath),
+          modulePaths:[
+            'node_modules/.pnpm/node_modules',
+            'node_modules',
+            // 本地link模式调试的时候，目录结构还是略有不同
+            // resolve(process.env.__VITESCVROOT,'node_modules'),
+          ].concat(Config.resolveModulePath),
         }),
+        // commonjs({
+        //   include:[/node_modules/,/element-ui/].concat(Config.buildCommonjsInclude),
+        // }),
         //💡 2.9之前manualChunks默认的策略是将 chunk 分割为 index 和 vendor，之后要手动启动
         splitVendorChunkPlugin(),
         vueOptions([{
@@ -117,7 +127,9 @@ export default function(Config){
         },
         ssr:false,
         commonjsOptions:{
-          include:mode=='production'?[]:Config.buildCommonjsInclude,
+          // include:mode=='production'?[]:Config.buildCommonjsInclude,
+          // include:Config.buildCommonjsInclude,
+          include:[/node_modules/].concat(Config.buildCommonjsInclude),
         },
         rollupOptions: {
           input: resolve(process.env.__PROJECTCACHEROOT,'index.html'),
@@ -138,14 +150,13 @@ export default function(Config){
         //💡 除了input（index.html）文件来检测需要预构建的依赖项外，指定其他入口文件检索
         // entries:[],
         //💡 默认情况下，不在 node_modules 中的，链接的包不会被预构建。使用此选项可强制预构建链接的包。
-        // include:[],
-        // include:mode=='production'?[]:Config.optimizeDepsInput,
+        include:[],
         // 💡 排除的预构建，vitescv/app包含虚拟模块，预构建的时候并不存在，会报错
-        // exclude:['vitescv/app','@vitescv/i18n'],
+        exclude:['vitescv/app'].concat(Config.optimizeDepsExclude),
         //💡 设置为 true 可以强制依赖预构建，而忽略之前已经缓存过的、已经优化过的依赖。
         // force:true,
         //💡 禁用依赖优化，值为 true 将在构建和开发期间均禁用优化器。传 'build' 或 'dev' 将仅在其中一种模式下禁用优化器。默认情况下，仅在开发阶段启用依赖优化。
-        disabled:true,
+        disabled:false,
       },
       preview:{
         port:Config.port,

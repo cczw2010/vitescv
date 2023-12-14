@@ -107,8 +107,3 @@ async function cliInit() {
     rmSync(process.env.__PROJECTCACHEROOT,{ recursive: true, force: true })
   }
 }
-
-//cli 只监控预设的root目录及相关文件 dev server.watcher 
-function watchFileToRestartServer(server,files){
-
-}
