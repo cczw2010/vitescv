@@ -1,4 +1,5 @@
 import { createRequire } from "module"
+import {pathToFileURL} from "url"
 import {normalizePath} from "vite"
 import { dirname,resolve,join} from "path"
 import { existsSync} from "fs"
@@ -25,7 +26,6 @@ export default async function(moduleOptions){
     try{
       let dir = dirname(moduleIndex)
       let moduleInfo = {
-        // uid:hashsum(moduleName),
         source:moduleIndex,
         dst:normalizePath(join(dir,'runtime.js')),
         dir,
@@ -34,14 +34,10 @@ export default async function(moduleOptions){
         option: options[moduleName]||{}
       }
       //config.js
-      let configFile = normalizePath(join(moduleInfo.dir,'config.js'))
-      if(isPackage){
-        configFile = `${moduleName}/config`
-      }
-      // console.log(configFile)
+      let configFile = pathToFileURL(join(moduleInfo.dir,'config.js'))
+      console.log(configFile)
       if(existsSync(configFile)){
-        //TODO for window test url
-        moduleInfo.config = await import('file://'+configFile).then(m=>m.default)
+        moduleInfo.config = await import(configFile).then(m=>m.default)
           .catch(e=>{
             console.error(`[${moduleName}] load config file fail!`,e)
             return null
