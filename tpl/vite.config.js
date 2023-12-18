@@ -6,14 +6,11 @@ import userConfig from "./config.js"
 import { createRequire } from "module"
 
 const require = createRequire(import.meta.url)
-// @rollup/plugin-node-resolve   modulePaths项
-userConfig.resolveModulePath = userConfig.resolveModulePath ||[]
 userConfig.manualChunks =  userConfig.manualChunks || {}
 userConfig.external =  userConfig.external ||[]
 userConfig.UIDirs = userConfig.UIDirs ||[]
 userConfig.UIResolvers =  userConfig.UIResolvers ||[]
-userConfig.buildCommonjsInclude =  userConfig.buildCommonjsInclude ||[]
-userConfig.optimizeDepsExclude =  userConfig.optimizeDepsExclude ||[]
+userConfig.alias = {'vue':require.resolve('vue')}
 //💡 处理模块包 的扩展配置文件，这个文件目前是必须的。
 if(userConfig.modules){
   for (let moduleName in userConfig.modules) {
@@ -22,9 +19,6 @@ if(userConfig.modules){
       console.error(`[vitescv] [${moduleName}] not exit`)
       continue
     }
-    // 统计记录要排除的模板module包，防止被预构建,因为可能存在模板
-    userConfig.optimizeDepsExclude.push(moduleName)
-
     let moduleDir = dirname(moduleIndex)
     try{
       let moduleOption = userConfig.modules[moduleName]||{}
@@ -46,7 +40,6 @@ if(userConfig.modules){
           return null
         })
       // console.debug(">>>>>>",moduleName,moduleDir)
-      userConfig.resolveModulePath.push(moduleDir)
 
       if(moduleConfig){
         if(moduleConfig.manualChunks){
@@ -57,9 +50,6 @@ if(userConfig.modules){
         }
         if(Array.isArray(moduleConfig.UIDirs)){
           userConfig.UIDirs = userConfig.UIDirs.concat(moduleConfig.UIDirs)
-        }
-        if(Array.isArray(moduleConfig.buildCommonjsInclude)){
-          userConfig.buildCommonjsInclude = userConfig.buildCommonjsInclude.concat(moduleConfig.buildCommonjsInclude)
         }
         // UIResolvers
         if(Array.isArray(moduleConfig.UIResolvers)){

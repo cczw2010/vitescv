@@ -1,6 +1,6 @@
 {
   "name": "vitescv",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "packageManager": "pnpm@8.5.0",
   "description": "A cli tool for vite & vue2.7",
@@ -32,6 +32,7 @@
     "minimatch": "^5.1.1",
     "sass": "~1.32",
     "terser": "^5.4.0",
+    "unplugin": "^1.5.1",
     "unplugin-auto-import": "^0.15.1",
     "unplugin-vue-components": "^0.22.11",
     "vite": "3",

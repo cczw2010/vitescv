@@ -1,6 +1,6 @@
 {
   "name": "@vitescv/pinia",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "pinia module for vitescv",
   "type": "module",
   "main": "index.js",

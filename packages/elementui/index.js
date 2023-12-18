@@ -16,19 +16,16 @@
  *    resolver:{}  
  *  }
  */
-
+import localElement from 'element-ui/lib/locale'
+<%option = option ||{}%>
 <%for(let lang in option.langs){%>
 import <%=lang%>_lang from 'element-ui/lib/locale/lang/<%=option.langs[lang]%>'
 <%}%>
-<%if(option){%>
-import localElement from 'element-ui/lib/locale'
-
 const langs = {}
 <%for(let lang in option.langs){%>
 langs.<%=lang%> =  <%=lang%>_lang
 <%}%>
-<%}%>
-
+  
 export default function(option,Context){
   option = option||{}
   Context.hook("APP:INIT",function(options) {

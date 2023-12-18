@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import VueMeta from 'vue-meta'
 
 // 默认配置
@@ -10,7 +9,7 @@ const defaultOption ={
   ssrAttribute:'data-vmssr',
   refreshOnceOnNavigation: true
 }
-export default function(option,{hook,HOOKS}){
+export default function(option,{Vue,hook,HOOKS}){
   option = Object.assign({},defaultOption,option)
   hook(HOOKS.INIT,function(options){
     Vue.use(VueMeta,option)

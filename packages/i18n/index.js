@@ -9,12 +9,9 @@
  *   silentFallbackWarn:false // 静默回滚错误
  * }
  */ 
-import Vue from 'vue'
 import VueI18n from 'vue-i18n'
-
-Vue.use(VueI18n)
-
 export default function(option,Context){
+  Context.Vue.use(VueI18n)
   option = Object.assign({silentFallbackWarn:true,message:{}},option)
   const i18n = new VueI18n(option)
   Context.hook("APP:INIT",function(options) {

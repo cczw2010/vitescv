@@ -18,7 +18,8 @@ for (const status in HookStatus) {
 
 //@main context主类
 const Context = {
-  HOOKS:HookStatus,                 
+  HOOKS:HookStatus,
+  Vue,
   app : null,                       //Vue应用实例
   router : null,                    //router实例
   // 注册钩子
@@ -75,6 +76,8 @@ function hookCreated(){
     hookfunc.call(Context)
   }
 }
+// =======================================start
+
 // @export 创建应用
 export default function(){
   console.debug("[app] init")

@@ -150,20 +150,6 @@ export default {
 ### component
 自定义的组件目录中的单文件组件在页面或者layout中无需引入，直接使用即可，将自动被加载引用。基于[unplugin-vue-components]实现。 第三方的UI组件可参考`自定义module`实现
 
-### metaInfo
-
-基于`vue-meta`通过组件中的`head`属性标签，实现了页面的基础信息管理（title,meta,link,style,script....），`page`中的配置会覆盖`layout`中的配置.
-
-```js
-export default {
-  head(){
-    // 函数方式可以使用组件的上下文`this`
-    return {
-      title:this.title
-    }
-  }
-}
-```
 
 ### router
 
@@ -205,6 +191,10 @@ user/_id/posts.vue      # /user/:id/posts
 
     该对象是项目的Vue实例，在`APP:CREATED`钩子之后才有效
 
+  - **Vue**
+
+    Vue原始对象（非实例），建议用户的模块可以直接使用该对象来取代自行导入vue包
+
   - **router**
 
     该对象是项目的router实例
@@ -232,15 +222,14 @@ user/_id/posts.vue      # /user/:id/posts
 
 ```js
 //💡 主文件 modules/xxx/index.js
-import Vue from "vue"
 import VueI18n from 'vue-i18n'
 import jsondata from <%=utils.normalPath(utils.resolve(option.jsonUrl))%>
-Vue.use(VueI18n)
 
 const lang = '<%=option.lang%>'
 const i18n = new VueI18n({...})
 // 导出默认初始化方法，返回mixin
 export default function(option,context){
+  context.Vue.use(VueI18n)
   ...
   #1 注册应用创建前的初始化钩子，options参数最终将合并到Vue实例的创建属性里，
   context.hook("APP:INIT",function(options) {
@@ -260,7 +249,7 @@ export default function(option,context){
 ```js
 //💡 modules/xxx/config.js
 export default {
-  // 💡unplugin-vue-components/vite  dirs项
+  // 💡unplugin-vue-components/vite  dirs项,可以自定义额外的组件自动加载目录
   UIDirs:[],
   // 💡unplugin-vue-components/vite  resolvers项,！！！与项目config.js中不同的是，
   //   这里可以是一个初始化方法(！注意该方法不是unplugin-vue-components的resolvers的构造函数)，
@@ -307,7 +296,7 @@ new Vue({
 
 ```js
 modules:{
-  '@/modules/xxx/index.js':{...},
+  './modules/xxx/index.js':{...},
 }
 
 ```
@@ -320,11 +309,12 @@ modules:{
 
 [@vitescv/vuemeta](./packages/vuemeta)
 
+[@vitescv/pinia](./packages/pinia)
+
 [@vitescv/elementui](./packages/elementui)
 
 [@vitescv/vuetify](./packages/vuetify)
 
-[@vitescv/pinia](./packages/pinia)
 
 ### TODO 中间件Middleware
 

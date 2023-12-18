@@ -90,7 +90,7 @@ async function cliInit() {
 
   //1 判断是否没有初始化过,有一个文件也不行
   if(isInit){
-    console.warn('[vitescv] This is not empty vitescv project! please remove the [config.js]  and  [.vitescv] in the root!')
+    console.warn('[vitescv] This is not empty vitescv project! please remove the [.vitescv] folder in the root!')
     return false
   }
   //2 创建一个基于项目的文件夹和文件
@@ -100,7 +100,12 @@ async function cliInit() {
       let fpath = resolve(process.env.__PROJECTCACHEROOT,tplFiles[k])
       copyFileSync(resolve(tplPath, tplFiles[k]),fpath,FsConstants.COPYFILE_FICLONE)
     }
-    copyFileSync(resolve(tplPath, userConfigFile),resolve(process.env.__PROJECTROOT, 'config.js'),FsConstants.COPYFILE_FICLONE)
+    let userConfigFileDst = resolve(process.env.__PROJECTROOT, 'config.js')
+    if(existsSync(userConfigFileDst)){
+      console.warn('[vitescv] config.js is exist, pass.')
+    }else{
+      copyFileSync(resolve(tplPath, userConfigFile),userConfigFileDst,FsConstants.COPYFILE_FICLONE)
+    }
     console.warn('[vitescv] init success')
   }catch(e){
     console.warn('[vitescv] init error:',e.message)

@@ -15,8 +15,6 @@ export default {
       return resolver(option)
     }    
   ],
-  // 💡 以下两项分别对应vite配置中的: build.commonjsOptions.include  仅在开发模式生效
-  buildCommonjsInclude:['@vitescv/elementui/components'],
   // 💡 外部化的包
   external:[],
   // 💡 扩展vite.config.js的rollupOptions.output.manualChunks设置项
