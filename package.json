@@ -1,6 +1,6 @@
 {
   "name": "vitescv",
-  "version": "1.1.0",
+  "version": "1.0.5",
   "type": "module",
   "packageManager": "pnpm@8.5.0",
   "description": "A cli tool for vite & vue2.7",
