@@ -189,7 +189,7 @@ user/_id/posts.vue      # /user/:id/posts
 
   - **app**
 
-    该对象是项目的Vue实例，在`APP:CREATED`钩子之后才有效
+    该对象是项目的Vue实例，在`APP:CREATED`钩子中才开始生效
 
   - **Vue**
 
@@ -245,7 +245,7 @@ export default function(option,context){
 
 }
 ```
-模块支持有限的修改用户项目配置文件，字需要在同目录下需要提供一个`config.js` ,如果是package还需要再`package.json`中设定.
+模块支持有限的修改用户项目配置文件，字需要在同目录下需要提供一个`config.js`.
 ```js
 //💡 modules/xxx/config.js
 export default {
@@ -272,14 +272,6 @@ export default {
   external:[],
   // 💡 扩展vite.config.js的rollupOptions.output.manualChunks设置项
   manualChunks:{},
-}
-
-//💡 如果是package安装包，还需要再package.json中设定。
-{
-  exports:{
-    ".": "./index.js",						//有exports就必须，因为有exports后，解析模块地址时main会莫名失效
-    "./config": "./config.js",		
-  }
 }
 
 ```

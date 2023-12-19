@@ -1,75 +1,33 @@
 // 从这里作为入口是为了方便监控和预留用户自定义vite.cofnig.js
-import { dirname ,join} from "path"
-import { existsSync } from "fs"
 import defaultViteConfig  from "vitescv/viteconfig"
-import userConfig from "./config.js"
-import { createRequire } from "module"
+import userConfig from "../config.js"
 
-const require = createRequire(import.meta.url)
-userConfig.manualChunks =  userConfig.manualChunks || {}
-userConfig.external =  userConfig.external ||[]
-userConfig.UIDirs = userConfig.UIDirs ||[]
-userConfig.UIResolvers =  userConfig.UIResolvers ||[]
-userConfig.alias = {'vue':require.resolve('vue')}
-//💡 处理模块包 的扩展配置文件，这个文件目前是必须的。
-if(userConfig.modules){
-  for (let moduleName in userConfig.modules) {
-    let moduleIndex = require.resolve(moduleName)
-    if(!moduleIndex){
-      console.error(`[vitescv] [${moduleName}] not exit`)
-      continue
-    }
-    let moduleDir = dirname(moduleIndex)
-    try{
-      let moduleOption = userConfig.modules[moduleName]||{}
-      let moduleConfigPath = null
-      // 配置文件地址
-      if(moduleName.endsWith(".js") || moduleName.startsWith("@/")){
-        moduleConfigPath = join(moduleDir,'config.js').replace(/^@\//,process.cwd()+'/')
-        if(!existsSync(moduleConfigPath)){
-          moduleConfigPath = null
-        }
-      }else if(moduleName.startsWith('@vitescv/')){
-        // 判断是不是 @vitescv/xxx 模块
-        moduleConfigPath = `${moduleName}/config`
-      }
-      let moduleConfig = await import(moduleConfigPath)
-        .then(m=>m.default)
-        .catch(e=>{
-          console.error(`[${moduleName}] load config file fail!`)
-          return null
-        })
-      // console.debug(">>>>>>",moduleName,moduleDir)
-
-      if(moduleConfig){
-        if(moduleConfig.manualChunks){
-          Object.assign(userConfig.manualChunks,moduleConfig.manualChunks)
-        }
-        if(Array.isArray(moduleConfig.external)){
-          userConfig.external = userConfig.external.concat(moduleConfig.external)
-        }
-        if(Array.isArray(moduleConfig.UIDirs)){
-          userConfig.UIDirs = userConfig.UIDirs.concat(moduleConfig.UIDirs)
-        }
-        // UIResolvers
-        if(Array.isArray(moduleConfig.UIResolvers)){
-          const resolverOption = moduleOption.resolver
-          moduleConfig.UIResolvers.forEach(uiResolver => {
-            switch(typeof uiResolver){
-              case 'function':
-                userConfig.UIResolvers.push(uiResolver.call(null,resolverOption))
-                break;
-              case 'object':
-                userConfig.UIResolvers.push(uiResolver)
-                break;
-            }
-          })
-        }
-      }
-    }catch(e){
-      console.debug(e)
-    }
-  }
-}
-// console.debug(userConfig)
-export default  defaultViteConfig(userConfig)
+const Config = Object.assign({
+  /****************** vite部分 *******************/
+  host:"127.0.0.1",
+  // port:8000,
+  source:"view",                //vue项目的源码目录
+  outDir:'dist',                //打包输出根路径
+  public:"public",              //资源文件目录名，同vite配置
+  // 编译时的兼容设置，设置为false可关闭。具体参考@vitejs/plugin-legacy的参数设置
+  legacy:false,
+  // {
+  //   // 以下是IE11兼容示例
+  //   // targets: ['IE>=11'],
+  //   // additionalLegacyPolyfills:['regenerator-runtime/runtime'],
+  // },
+  /****************** 自定义部分 *******************/
+  // middlewares:['view/middlewares/test.js'],         //全局路由中间件 ，应用于所有路由
+  modules:{},
+  //打包时强制外部化的库 
+  external:[],
+  //404页面             
+  page404:'/404',
+  //路由动态加载时的loading组件，AppLoading 预设
+  // componentLoading:'@/view/components/loading.vue',
+  //路由动态加载错误时显示组件，AppError 预设
+  // componentError:'@/view/components/xx',
+  //路由页面显示组件，AppView 预设         
+  // compomentRouteView:'@/view/components/xx',
+},userConfig)
+export default  defaultViteConfig(Config)

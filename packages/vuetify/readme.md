@@ -1,11 +1,13 @@
 ### 简介
 
-vitescv的vuetify自动导入模块
+vitescv的vuetify自动导入模块,，多语言切换依赖于`@vitescv/i18n`
+
+并未处理字体，请参考[这里](https://v2.vuetifyjs.com/zh-Hans/getting-started/installation/#section-5b8988c55b574f53)  
 
 ### 安装
 
 ```js
-pnpm add @vitescv/vuetify
+pnpm add @vitescv/vuetify 
 ```
 
 ### 使用
@@ -15,7 +17,16 @@ pnpm add @vitescv/vuetify
 modules:{
   ...
   "@vitescv/vuetify":{
-    size:'small'
+     // 与i18n的语言包映射关系
+    "langs":{
+      'en':'en',
+      'zh':'zh-Hans',
+      ...
+    },
+    // vuetify的初始化配置，lang部分已经自动根据上面的配置处理了,无需处理
+    "option":{
+      ...
+    }
   },
 }
 ```

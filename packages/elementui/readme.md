@@ -22,8 +22,8 @@ modules:{
       'zh':'zh-CN',
       ...
     },
-    // elementUI初始化install是的设置参数
-    "option":{size:'small'}
+    // ElementUiResolverOptions
+    "resolver":{}
   },
 }
 ```

@@ -4,7 +4,7 @@
  * options: 代表针对type的配置
  * 关于Monorepo 和链接依赖,参考：https://cn.vitejs.dev/guide/dep-pre-bundling.html#monorepos-and-linked-dependencies
  */
- import resolver from "./resolver.js"
+import resolver from "./resolver.js"
 
 export default {
   // 💡unplugin-vue-components/vite  dirs项
@@ -18,6 +18,6 @@ export default {
   // 💡 外部化的包
   external:[],
   // 💡 扩展vite.config.js的rollupOptions.output.manualChunks设置项
-  manualChunks:{'element-ui': ['element-ui']},
+  manualChunks:{'elementui': ['element-ui','@vitescv/elementui']},
 }
 

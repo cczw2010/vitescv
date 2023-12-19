@@ -8,17 +8,19 @@ import AutoImport from 'unplugin-auto-import/vite'
 import vueRoutes from "./src/vitePlugins/vite-plugin-vue-routes.js"
 import vueOptions from "./src/vitePlugins/vite-plugin-vue-options.js"
 import vueMiddleware from "./src/vitePlugins/vite-plugin-vue-middleware.js"
-import vueModules from "./src/vitePlugins/unplugin-vue-modules.js"
+import {initModules,unpluginModules} from "./src/moduleLib.js"
 import { layoutNameKey,pageNameKey} from './src/constants.js'
 
 // 根据用户配置返回vite.config.js配置
 export default function(Config){
   // console.log(Config)
-  const unpluginvModules = vueModules(Config.modules)
-  return defineConfig(({ command, mode, ssrBuild }) => {
+  return defineConfig(async ({ command, mode, ssrBuild }) => {
     // const env = loadEnv(mode, process.cwd(), '')
+    const moduleConfigs =  await initModules(Config.modules)
+    Object.assign(Config,moduleConfigs)
+
+    const unpluginvModules = unpluginModules()
     const isProduction = mode == "production"
-    const assetsDir = "assets"
     return {
       //💡 项目根目录
       root:process.env.__PROJECTCACHEROOT,
@@ -42,9 +44,7 @@ export default function(Config){
         dedupe:["vue"]
       },
       plugins: [
-        Config.legacy&&legacy(Object.assign({
-          targets: ['defaults']
-        },Config.legacy)),
+        Config.legacy&&legacy(Config.legacy),
         // Inspect(),
         nodeResolve({
           preserveSymlinks: false ,
@@ -116,7 +116,7 @@ export default function(Config){
         emptyOutDir:true,
         copyPublicDir:true,
         //💡 打包输出时资源文件目录
-        assetsDir,                
+        assetsDir:Config.assetsDir,                
         //💡 模块预加载，对于ssr很重要
         modulePreload: {
           polyfill: true,
@@ -141,8 +141,8 @@ export default function(Config){
             // },    
             manualChunks: Object.assign({
               'vue': ['vue'],
-              'vue-router': ['vue-router'],
-              // 'vmodules': ['virtual:modules','virtual:router-routes','virtual:middlewares'],
+              'vrouter': ['vue-router','virtual:router-routes'],
+              // 'vmodules': ['virtual:modules','virtual:middlewares','virtual:router-routes'],
             },Config.manualChunks),
           },
         },
@@ -154,7 +154,7 @@ export default function(Config){
         //💡 除了input（index.html）文件来检测需要预构建的依赖项外，指定其他入口文件检索
         // entries:[],
         //💡 默认情况下，不在 node_modules 中的，链接的包不会被预构建。使用此选项可强制预构建链接的包。
-        include:[],
+        include:Config.optimizeInclude,
         // 💡 排除的预构建，vitescv/app包含虚拟模块，预构建的时候并不存在，会报错
         exclude:['vitescv/app'],
         //💡 设置为 true 可以强制依赖预构建，而忽略之前已经缓存过的、已经优化过的依赖。

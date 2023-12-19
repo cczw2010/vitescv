@@ -1,12 +1,8 @@
 /**
- * Element-ui for vitescv & vue2  
- * 使用全部引入的模式，按需引入目前在插件里还有点问题，保内的elementui依赖预构建不成功(https://cn.vitejs.dev/guide/dep-pre-bundling#monorepos-and-linked-dependencies)
- * 
+ * Element-ui for vitescv & vue2
  * 配置信息可选，主要是设置多语言，依赖于vue-i18n 如下
  * @param option
  *  {
- *    // 默认语言,同@vitescv/i18n的locale
- *    "locale":'en',
  *    // 与@vitescv/i18n 中的语言包一一对应映射，参考elementui国际化语言包名 https://element.eleme.cn/#/zh-CN/component/i18n
  *    "langs":{
  *      'en':'en',
@@ -27,7 +23,6 @@ langs.<%=lang%> =  <%=lang%>_lang
 <%}%>
   
 export default function(option,Context){
-  option = option||{}
   Context.hook("APP:INIT",function(options) {
     Object.assign(options,{
       mixin:{

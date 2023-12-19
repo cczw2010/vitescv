@@ -10,14 +10,13 @@ export default {
   // 💡unplugin-vue-components/vite  resolvers项,！！！与项目config.js中不同的是，这里可以是一个初始化方法，模块配置中的resolver属性会当做配置信息注入到该方法里，方便定制化
   UIResolvers:[
     // VuetifyResolver
-    // {
-    //   type: "component",
-    //   resolve: (name) => {
-    //     if (name.match(/^V[A-Z]/))
-    //       return { name, from: "@vitescv/vuetify/components" };
-    //   }
-    // }
+    {
+      type: "component",
+      resolve: (name) => {
+        if (name.match(/^V[A-Z]/))
+          return { name, from: 'vuetify/lib' }
+      }
+    }
   ],
-  // 💡 扩展vite.config.js的rollupOptions.output.manualChunks设置项
-  manualChunks:{'vvuetify': ['vuetify','@vitescv/vuetify']},
+  manualChunks:{'vuetifyui': ['vuetify/lib']},
 }

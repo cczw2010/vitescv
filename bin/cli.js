@@ -82,11 +82,10 @@ async function cliInit() {
   const tplFiles = {
       entry:'entry.js',
       index:'index.html',
-      config:'config.js',
       viteConfig:'vite.config.js',
     }
   //  用户个性化配置文件
-  const userConfigFile = "userConfig.js"
+  const userConfigFile = "config.js"
 
   //1 判断是否没有初始化过,有一个文件也不行
   if(isInit){
