@@ -48,8 +48,11 @@ async function cliDev() {
     configFile: viteConfigPath,
   })
   // 增加监控项目文件重启开发服务器
-  chokidar.watch(["config.js",".env*"]).on('change', (event, path) => {
-    server.restart()
+  chokidar.watch([
+    "config.js",
+    ".env*",
+  ]).on('change', (event, path) => {
+    server.restart(true)
   });
   await server.listen()
   server.printUrls()

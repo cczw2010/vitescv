@@ -110,6 +110,7 @@ class RouteModule{
   // 设置开发服务器  for dev
   setDevServer(server){
     this._devServer = server
+    server.watcher.add([this.option.layoutRoot,this.option.pageRoot])
     server.watcher.on("ready",()=>{
       // console.debug(">>>>>>server.wathcer",server.watcher.getWatched())
       server.watcher
@@ -125,13 +126,6 @@ class RouteModule{
           this.removeRoute(fpath,true)
         }else if(this.isLayout(fpath)){
           this.removeLayout(fpath,true)
-        }
-      })
-      .on('change', fpath => {
-        if(this.isPage(fpath)){
-          this.setRoute(fpath,false)
-        }else if(this.isLayout(fpath)){
-          this.setLayout(fpath,false)
         }
       })
     })

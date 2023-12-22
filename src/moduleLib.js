@@ -88,6 +88,9 @@ function tidyModuleConfig(moduleConfig,moduleOption){
     if(Array.isArray(moduleConfig.UIDirs)){
       moduleConfigs.UIDirs = moduleConfigs.UIDirs.concat(moduleConfig.UIDirs)
     }
+    if(Array.isArray(moduleConfig.optimizeInclude)){
+      moduleConfigs.optimizeInclude = moduleConfigs.optimizeInclude.concat(moduleConfig.optimizeInclude)
+    }
     // UIResolvers
     if(Array.isArray(moduleConfig.UIResolvers)){
       const resolverOption = moduleOption.resolver

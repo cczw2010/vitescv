@@ -12,13 +12,12 @@ import {initModules,unpluginModules} from "./src/moduleLib.js"
 import { layoutNameKey,pageNameKey} from './src/constants.js'
 
 // 根据用户配置返回vite.config.js配置
-export default function(Config){
-  // console.log(Config)
+export default function(userConfig){
+  // console.log(userConfig)
   return defineConfig(async ({ command, mode, ssrBuild }) => {
     // const env = loadEnv(mode, process.cwd(), '')
-    const moduleConfigs =  await initModules(Config.modules)
-    Object.assign(Config,moduleConfigs)
-
+    const moduleConfigs =  await initModules(userConfig.modules)
+    const Config = Object.assign({},userConfig,moduleConfigs)
     const unpluginvModules = unpluginModules()
     const isProduction = mode == "production"
     return {
@@ -143,7 +142,7 @@ export default function(Config){
               'vue': ['vue'],
               'vrouter': ['vue-router','virtual:router-routes'],
               // 'vmodules': ['virtual:modules','virtual:middlewares','virtual:router-routes'],
-            },Config.manualChunks),
+            },Config.manualChunks)
           },
         },
         //💡 览器兼容目标,使用plugin-legacy 就不用设置了
@@ -160,10 +159,11 @@ export default function(Config){
         //💡 设置为 true 可以强制依赖预构建，而忽略之前已经缓存过的、已经优化过的依赖。
         force:false,
         // 只有development的时候才使用兼容插件来处理，因为prodction的时候会走rollup的unpluginvModules.vite 会冲突
-        disabled:'build',
+        disabled:false,
         esbuildOptions:{
           preserveSymlinks:false,
           sourcemap: false,
+          // sourcesContent: false,
           plugins:[unpluginvModules.esbuild()]
         }
       },
@@ -177,10 +177,10 @@ export default function(Config){
         watch: {
           // During tests we edit the files too fast and sometimes chokidar
           // misses change events, so enforce polling for consistency
-          ignored: ['**/*.d.ts'],
+          ignored: ['**/*.d.ts','.git','node_modules'],
           ignoreInitial: false,
           followSymlinks:true,
-          include:['../config.js'],
+          include:['../'],
           // ↓ windows文件在wsl上运行时，开启
           // usePolling: true,
           interval: 200,
