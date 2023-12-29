@@ -12,9 +12,7 @@ export default {
   //   additionalLegacyPolyfills:['regenerator-runtime/runtime'],
   // }
   /****************** 自定义部分 *******************/
-  // middlewares:['view/middlewares/test.js'],         //全局路由中间件 ，应用于所有路由
-  modules:{
-},
+  modules:{},
   //打包时强制外部化的库 
   external:[],
   //404页面             

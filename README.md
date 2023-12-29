@@ -41,15 +41,9 @@ source:"view",                           // vue项目的源码目录
 outDir:'dist',                           // 打包输出根路径
 // 编译时的兼容设置，设置为false可关闭。具体参考@vitejs/plugin-legacy的参数设置
 legacy:{},
-//编译过程控制 按需引入第三方UI库，参考：unplugin-vue-components/resolvers
-UIResolvers:{
-  "ElementUiResolver":{importStyle:true},
-},
 // 强制外部化的库
 external:['vue'],                         //打包时强制外部化的库，默认空
 /****************** 自定义部分 *******************/
-//全局路由中间件 ，应用于所有路由
-middlewares:['view/middlewares/xxx.js'],
 //自定义模块
 modules:[
   "@vitescv/i18n":{
@@ -79,8 +73,6 @@ config.js         #vitescv配置文件
 view/pages        #页面目录
 view/layouts      #layout目录
 view/components   #自动加载的单文件组件路径
-view/middlewares  #自动加载的路由middleware
-
 ```
 
 ### page
@@ -293,8 +285,6 @@ modules:{
 
 ```
 
-
-
 目前的一些模块列表：
 
 [@vitescv/i18n](./packages/i18n)
@@ -306,36 +296,6 @@ modules:{
 [@vitescv/elementui](./packages/elementui)
 
 [@vitescv/vuetify](./packages/vuetify)
-
-
-### TODO 中间件Middleware
-
-vue的路由中间件（路由守卫），可以在配置文件中配置对所有页面生效的全局`beforeEach`路由守卫: 
-**CSR**:客户端初始化和每次页面路由都会执行
-
-*  路由文件
-
-```js
-
-export default function({to,from,next,store,router}){
-  <!-- 作为守卫执行，所以必须执行next方法来决定路由的执行情况 -->
-  if(....){
-    return next('/login')
-  }
-  next()
-  ...
-}
-
-```
-
-* config.js 设定全局路由中间件
-
-```js
-vue:{
-    ...
-    middlewares:['view/middlewares/auth.js'] 
-}
-```
 
 ### 资源文件
 

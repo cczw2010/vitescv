@@ -30,6 +30,7 @@ const moduleMap = new Map()
  */ 
 export async function initModules(options){
   Object.assign(moduleOptions,options)
+  moduleMap.clear()
   for (let moduleName in moduleOptions) {
     let isPackage = !existsSync(resolve(process.env.__PROJECTROOT,moduleName))
     let moduleIndex = normalizePath(require.resolve(moduleName))

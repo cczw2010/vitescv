@@ -4,7 +4,6 @@
 import Vue from 'vue'
 import VueRouter from "vue-router"
 import getRoutes,{page404} from "virtual:router-routes"
-import {getMiddlewares} from "virtual:middlewares"
 // 3.1开始 
 Vue.use(VueRouter)
 export default function createRouter () {
@@ -25,7 +24,6 @@ export default function createRouter () {
  
   //注册在全局beforeEach，服务端运行一次，在onReady之前也会执行一次  从初始路由到目的路由
   router.beforeEach((to, from, next) => {
-    // VueRouter.START_LOCATION==from
     console.debug("[app] (router.beforeEach) from:",from.fullPath,'to:',to.fullPath)
     // 1 判断路由是否无效路由
     let matched = router.getMatchedComponents(to);
@@ -36,32 +34,7 @@ export default function createRouter () {
         return next(new Error('[app] router match error:no matched router'))
       }
     }
-    //  2 处理全局中间件 
-    const middlewares = getMiddlewares()
-    if(middlewares.length==0){
-      return next()
-    }
-    const middleware_fns = []
-    const params = Object.assign({to,from,next,router})
-    middlewares.forEach(middleware => {
-      middleware_fns.push(middleware(params))
-    });
-    Promise.all(middleware_fns)
-      // .then(values=>{
-      //   // console.debug('<<<<<<<Promise.all',values)
-      // })
-      .catch(e=>{
-        // console.error('global route middleware error:',e)
-        next(e)
-      })
   })
-  
-  // 进入路由后 
-  // router.afterEach((to,from)=>{
-  //   // let matched = router.getMatchedComponents(to);
-  //   console.debug(">>>global router.afterEach:")
-    
-  // })
   return router
 }
 

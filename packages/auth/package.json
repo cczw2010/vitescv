@@ -1,0 +1,12 @@
+{
+  "name": "@vitescv/auth",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "index.js",
+  "description": "auth module for vitescv & vue2.7",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "vue": "^2.7.14"
+  }
+}

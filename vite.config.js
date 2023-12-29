@@ -7,7 +7,6 @@ import Components from 'unplugin-vue-components/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import vueRoutes from "./src/vitePlugins/vite-plugin-vue-routes.js"
 import vueOptions from "./src/vitePlugins/vite-plugin-vue-options.js"
-import vueMiddleware from "./src/vitePlugins/vite-plugin-vue-middleware.js"
 import {initModules,unpluginModules} from "./src/moduleLib.js"
 import { layoutNameKey,pageNameKey} from './src/constants.js'
 
@@ -68,7 +67,6 @@ export default function(userConfig){
           options:{[layoutNameKey]:true},
         }]),
         unpluginvModules.vite(),
-        vueMiddleware(Config.middlewares),
         vueRoutes({
           pageRoot:`${Config.source}/pages`,
           layoutRoot:`${Config.source}/layouts`,
@@ -141,7 +139,7 @@ export default function(userConfig){
             manualChunks: Object.assign({
               'vue': ['vue'],
               'vrouter': ['vue-router','virtual:router-routes'],
-              // 'vmodules': ['virtual:modules','virtual:middlewares','virtual:router-routes'],
+              // 'vmodules': ['virtual:modules','virtual:router-routes'],
             },Config.manualChunks)
           },
         },
