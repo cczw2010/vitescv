@@ -223,14 +223,14 @@ const i18n = new VueI18n({...})
 export default function(option,context){
   context.Vue.use(VueI18n)
   ...
-  #1 注册应用创建前的初始化钩子，options参数最终将合并到Vue实例的创建属性里，
+  # 注册应用创建前的初始化钩子，options参数最终将合并到Vue实例的创建属性里，
   context.hook("APP:INIT",function(options) {
     options.i18n = i18n
     options.mixin = {
       ...
     }
   })
-  #注册app初始化之后的钩子
+  # 注册app初始化之后的钩子
   context.hook("APP:CREATED",function() {
   	context.app ...
   })

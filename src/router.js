@@ -25,7 +25,7 @@ export default function createRouter () {
   //注册在全局beforeEach，服务端运行一次，在onReady之前也会执行一次  从初始路由到目的路由
   router.beforeEach((to, from, next) => {
     console.debug("[app] (router.beforeEach) from:",from.fullPath,'to:',to.fullPath)
-    // 1 判断路由是否无效路由
+    // 判断路由是否无效路由
     let matched = router.getMatchedComponents(to);
     if(!matched.length){
       if(page404){
@@ -34,6 +34,7 @@ export default function createRouter () {
         return next(new Error('[app] router match error:no matched router'))
       }
     }
+    next()
   })
   return router
 }
