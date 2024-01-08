@@ -7,6 +7,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm"
   },
+  "keywords": ["vitescv","vite","vue","rollup","cli"],
   "bin": {
     "vitescv": "./bin/cli.js"
   },
