@@ -281,6 +281,7 @@ new Vue({
 ```js
 modules:{
   './modules/xxx/index.js':{...},
+  "@vitescv/i18n":{...}
 }
 
 ```

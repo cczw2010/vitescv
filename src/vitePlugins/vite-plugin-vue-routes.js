@@ -41,7 +41,6 @@ const defaultComponents = {
  * @returns
  */
 export default function (option) {
-  // let config
   option = Object.assign({},defaultOption,option)
   option.pageRoot = resolve(option.pageRoot)
   option.layoutRoot = resolve(option.layoutRoot)
@@ -121,6 +120,12 @@ class RouteModule{
           this.setLayout(fpath,true)
         }
       })
+      .on('change', fpath => {
+        if(this.isPage(fpath)){
+          // 会自动检查route的meta信息是否变了，变了的话要热更新模块
+          this.setRoute(fpath)
+        }
+      })
       .on('unlink', fpath => {
         if(this.isPage(fpath)){
           this.removeRoute(fpath,true)
@@ -180,7 +185,9 @@ class RouteModule{
     this.layouts.delete(pagePath)
     this.reloadModule()
   }
-  // 新增一个页面路由
+  // 新增一个页面路由，reloadModule的情况有两个，
+  // 1 参数reload设置为true，强制reload 
+  // 2 如果路由之前存在，则判断是否路由的数据信息变更了，变更了则一定会重载路由模块
   setRoute(pagePath,reload=false){
     const pathObj = pathParse(pagePath)
     const relativeDir = relative(this.option.pageRoot,pathObj.dir)
@@ -195,11 +202,7 @@ class RouteModule{
       console.error(`[app] page route init error:${pagePath}`,e)
       return
     }
-    // console.debug(">>route:",pagePath,result.layout)
-    // const route = this.routes.get(pagePath)
-    // if(route && route.meta && route.meta.layout==sfc.result.layout){
-    //   return
-    // }
+  
     const result = sfc.result
     const _pagePath =  normalizePath(pagePath)
     const _layoutPath = normalizePath(`${this.option.layoutRoot}/${result.layout}${this.option.sfcExt}`)
@@ -211,6 +214,23 @@ class RouteModule{
     result.asyncData = false
     result.asyncDataLayout = false
     
+    // reload为false，判断是否变更了数据meta， 变更了照样reload
+    const oldRoute = this.routes.get(pagePath)
+    if(!reload && oldRoute && oldRoute.meta){
+      let oldKeys = Object.keys(oldRoute.meta).sort()
+      let newKeys = Object.keys(sfc.result).sort()
+      if(JSON.stringify(oldKeys)!=JSON.stringify(newKeys)){
+        reload = true
+      }else{
+        reload = oldKeys.some((v)=>{
+          return oldRoute.meta[v]!=sfc.result[v]
+        })
+      }
+      // debug
+      if(reload){
+        console.debug(`page route meta changed. reload routes`)
+      }
+    }
     
     this.routes.set(pagePath,{
       name:result.name,

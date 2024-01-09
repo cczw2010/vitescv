@@ -72,15 +72,24 @@ export default function(config,Context){
   Context.hook("APP:CREATED",function() {
     const useUserStore = this.Pinia.defineStore('AUTH', AuthStore)
     this.router.beforeEach((to,from,next)=>{
-      console.log('>>>>>>>>>>>>>>',to)
       this.Auth.store = useUserStore()
+
+      let needCheck = to.meta.auth===true || (to.meta.auth!==false && globalConfig.auth)
+      // console.log('>>>>>>>>>>>>>>to:',to,'needCheck:',needCheck)
       if(this.Auth.store.isLogin){
+        // 登录了不再判断直接跳过
         next()
-      }else if(globalConfig.redirect){
-        return next(globalConfig.redirect)
+      }else if(!needCheck){
+        // 未登录，且当前页面不校验，且默认不校验，跳过
+        next()
       }else{
-        next(false)
-        next(new Error(globalConfig.message))
+        // 要校验且未登录，判断跳转还是直接报错
+        if(globalConfig.redirect){
+          return next(globalConfig.redirect)
+        }else{
+          // next(false)
+          return next(new Error(globalConfig.message))
+        }
       }
     })
   })
