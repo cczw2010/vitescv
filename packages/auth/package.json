@@ -8,5 +8,8 @@
   },
   "devDependencies": {
     "vue": "^2.7.14"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
