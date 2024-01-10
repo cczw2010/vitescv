@@ -33,7 +33,10 @@ export async function initModules(options){
   moduleMap.clear()
   for (let moduleName in moduleOptions) {
     let isPackage = !existsSync(resolve(process.env.__PROJECTROOT,moduleName))
-    let moduleIndex = normalizePath(require.resolve(moduleName))
+    let moduleIndex = normalizePath(require.resolve(moduleName,{
+      // link调试开发的时候找不到，增加项目根目录
+      paths:[process.env.__PROJECTROOT]
+    }))
     if(!moduleIndex){
       console.error(`[vitescv] [${moduleName}] not exit`)
       continue
