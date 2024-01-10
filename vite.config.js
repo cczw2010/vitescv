@@ -51,7 +51,7 @@ export default function(userConfig){
             'node_modules',
             'node_modules/.pnpm/node_modules',
             // 以下for link
-            // resolve(process.env.__VITESCVROOT,'node_modules')
+            resolve(process.env.__VITESCVROOT,'node_modules')
           ]
           // .concat(Config.resolveModulePath),
         }),
