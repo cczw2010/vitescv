@@ -19,6 +19,11 @@ export default function(userConfig){
     const Config = Object.assign({},userConfig,moduleConfigs)
     const unpluginvModules = unpluginModules()
     const isProduction = mode == "production"
+    // const moduleChunks = Object.assign({
+    //   'vue': ['vue'],
+    //   // 'vrouter': ['vue-router','virtual:router-routes'],
+    //   // 'vmodules': ['virtual:modules','virtual:router-routes'],
+    // },Config.manualChunks)
     return {
       //💡 项目根目录
       root:process.env.__PROJECTCACHEROOT,
@@ -27,7 +32,7 @@ export default function(userConfig){
         'process.env.__VITESCVROOT':JSON.stringify(process.env.__VITESCVROOT),
         'process.env.__PROJECTROOT':JSON.stringify(process.env.__PROJECTROOT)
       },
-      logLevel: 'info',
+      logLevel: "info",
       //💡 应用类型，默认spa，
       appType: 'spa',
       //💡 资源文件目录，默认<root>/public，注意！！访问时其下的资源文件直接通过/根目录访问到
@@ -136,11 +141,25 @@ export default function(userConfig){
             //   // console.log(assetInfo)
             //   return `${assetsDir}/[name]-[hash].[ext]`; // 不匹配的资源文件存放至assets，以[name]-[hash].[ext]命名规则，注意两处的命名规则不同
             // },    
-            manualChunks: Object.assign({
-              'vue': ['vue'],
-              'vrouter': ['vue-router','virtual:router-routes'],
-              // 'vmodules': ['virtual:modules','virtual:router-routes'],
-            },Config.manualChunks)
+            // manualChunks(id, { getModuleInfo }) {
+            //   // console.log(id,getModuleInfo(id))
+            //   if(id.includes('node_modules')){
+            //     for (const key in moduleChunks) {
+            //       let testKey = moduleChunks[key].some(v=>{
+            //         return id.includes(v)
+            //       })
+            //       if(testKey){
+            //         console.log("testKey",id)
+            //       }
+            //       let hasKey = moduleChunks[key].some(v=>{
+            //         return id.includes("node_modules/"+v)
+            //       })
+            //       if(hasKey){
+            //         return key
+            //       }
+            //     }
+            //   }
+            // },
           },
         },
         //💡 览器兼容目标,使用plugin-legacy 就不用设置了
@@ -153,7 +172,7 @@ export default function(userConfig){
         //💡 默认情况下，不在 node_modules 中的，链接的包不会被预构建。使用此选项可强制预构建链接的包。
         include:Config.optimizeInclude,
         // 💡 排除的预构建，vitescv/app包含虚拟模块，预构建的时候并不存在，会报错
-        exclude:['vitescv/app'],
+        // exclude:['vitescv/app'],
         //💡 设置为 true 可以强制依赖预构建，而忽略之前已经缓存过的、已经优化过的依赖。
         force:false,
         // 只有development的时候才使用兼容插件来处理，因为prodction的时候会走rollup的unpluginvModules.vite 会冲突
@@ -178,7 +197,7 @@ export default function(userConfig){
           ignored: ['**/*.d.ts','.git','node_modules'],
           ignoreInitial: false,
           followSymlinks:true,
-          include:['../'],
+          // include:['../'],
           // ↓ windows文件在wsl上运行时，开启
           // usePolling: true,
           interval: 200,

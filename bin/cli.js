@@ -2,10 +2,10 @@
 
 "use strict"
 import { resolve } from "path"
-import chokidar from "chokidar";
 import { existsSync,copyFileSync,constants as FsConstants,mkdirSync,rmSync} from "fs"
 import { fileURLToPath } from "url"
 import { createServer as createViteServer,build,preview} from 'vite'
+// import chokidar from "chokidar";
 
 // vitescv 根目录
 process.env.__VITESCVROOT = fileURLToPath(new URL("../",import.meta.url))
@@ -46,16 +46,11 @@ async function cliDev() {
   const server = await createViteServer({
     mode: 'development',
     configFile: viteConfigPath,
+    envFile:true,
   })
-  // 增加监控项目文件重启开发服务器
-  chokidar.watch([
-    "config.js",
-    ".env*",
-  ]).on('change', (event, path) => {
-    server.restart(true)
-  });
   await server.listen()
   server.printUrls()
+  // server.bindCLIShortcuts({ print: true })
 }
 // 编译项目
 async function cliBuild() {

@@ -262,7 +262,7 @@ export default {
   ],
   // 💡 外部化的包
   external:[],
-  // 💡 扩展vite.config.js的rollupOptions.output.manualChunks设置项
+  // 💡 扩展vite.config.js的rollupOptions.output.manualChunks设置项,!!!该项，1.1.0更换为vite5之后，该项已经失效
   manualChunks:{},
 }
 

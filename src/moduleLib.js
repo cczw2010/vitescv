@@ -10,17 +10,20 @@ const require = createRequire(import.meta.url)
 // 模块配置信息
 const moduleOptions = {}
 // 模块config处理结果
-const moduleConfigs = {
-  manualChunks: {},
-  external: [],
-  UIDirs: [],
-  UIResolvers:[],
-  alias: {'vue':require.resolve('vue')},
-  optimizeInclude:[]
-}
+const moduleConfigs = {}
 // 模块信息map
 const moduleMap = new Map()
 
+function initModuleConfigs(){
+  Object.assign(moduleConfigs,{
+    manualChunks: {},
+    external: [],
+    UIDirs: [],
+    UIResolvers:[],
+    alias: {'vue':require.resolve('vue')},
+    optimizeInclude:[]
+  })
+}
 /**
  * 初始化 modules 配置, 返回整理后的模块配置集合
  * @param {object|false} options  vuemodule的配置，设置为false关闭
@@ -31,6 +34,7 @@ const moduleMap = new Map()
 export async function initModules(options){
   Object.assign(moduleOptions,options)
   moduleMap.clear()
+  initModuleConfigs()
   for (let moduleName in moduleOptions) {
     let isPackage = !existsSync(resolve(process.env.__PROJECTROOT,moduleName))
     let moduleIndex = normalizePath(require.resolve(moduleName,{
