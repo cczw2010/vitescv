@@ -1,6 +1,6 @@
 {
   "name": "vitescv",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "type": "module",
   "packageManager": "pnpm@8.5.0",
   "description": "A cli tool for vite & vue2.7",
@@ -18,8 +18,12 @@
     "vitescv": "./bin/cli.js"
   },
   "engines": {
-    "node": "^20.0.0",
-    "pnpm":"^8.5.0"
+    "node": "^18.0.0 || >=20.0.0"
+  },
+  "homepage": "https://github.com/cczw2010/vitescv",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cczw2010/vitescv.git"
   },
   "files": [
     "src",

@@ -17,6 +17,7 @@ export default function(userConfig){
     // const env = loadEnv(mode, process.cwd(), '')
     const moduleConfigs =  await initModules(userConfig.modules)
     const Config = Object.assign({},userConfig,moduleConfigs)
+    const outDir = resolve(process.env.__PROJECTROOT,Config.outDir)
     const unpluginvModules = unpluginModules()
     const isProduction = mode == "production"
     // const moduleChunks = Object.assign({
@@ -114,7 +115,7 @@ export default function(userConfig){
         chunkSizeWarningLimit:200,  //kb
         // minify:false,
         //💡 打包输出根路径,命令行控制
-        outDir:resolve(process.env.__PROJECTROOT,Config.outDir),
+        outDir,
         emptyOutDir:true,
         copyPublicDir:true,
         //💡 打包输出时资源文件目录
@@ -194,7 +195,7 @@ export default function(userConfig){
         watch: {
           // During tests we edit the files too fast and sometimes chokidar
           // misses change events, so enforce polling for consistency
-          ignored: ['**/*.d.ts','.git','node_modules','dist','.DS_Store',process.env.__PROJECTCACHEROOT],
+          ignored: ['**/*.d.ts','../.git','../node_modules','../dist','.DS_Store',process.env.__PROJECTCACHEROOT,outDir],
           ignoreInitial: true,  //很重要，不然会不停重启
           followSymlinks:true,
           include:['config.js'],
