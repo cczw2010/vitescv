@@ -194,8 +194,9 @@ export default function(userConfig){
         watch: {
           // During tests we edit the files too fast and sometimes chokidar
           // misses change events, so enforce polling for consistency
-          ignored: ['**/*.d.ts','.git','node_modules'],
-          ignoreInitial: false,
+          ignored: ['**/*.d.ts','.git','node_modules','dist','.DS_Store',process.env.__PROJECTCACHEROOT],
+          ignoreInitial: true,  //很重要，不然会不停重启
+          cwd:process.cwd(),
           followSymlinks:true,
           // include:['../'],
           // ↓ windows文件在wsl上运行时，开启
