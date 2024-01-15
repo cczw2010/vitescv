@@ -196,9 +196,8 @@ export default function(userConfig){
           // misses change events, so enforce polling for consistency
           ignored: ['**/*.d.ts','.git','node_modules','dist','.DS_Store',process.env.__PROJECTCACHEROOT],
           ignoreInitial: true,  //很重要，不然会不停重启
-          cwd:process.cwd(),
           followSymlinks:true,
-          // include:['../'],
+          include:['config.js'],
           // ↓ windows文件在wsl上运行时，开启
           // usePolling: true,
           interval: 200,
