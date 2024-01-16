@@ -167,7 +167,7 @@ user/_id/posts.vue      # /user/:id/posts
 
 全局可编译vue module模块加载，在app创建期间调用，可用于加载一些定制的模块初始化。（开发第三方包过程中vite的预构建依赖优化选项引发了开发模式太多问题，持续优化）
 
-模块默认返回初始化方法，该方法接受用户设置参数对象，和一个应用上下文`context` ,可在应用运行生命周期注册钩子函数。可参考源码中`@vitescv/i18n` 和 `@vitescv/element-ui`模块。
+模块默认返回初始化方法，该方法可以为`[async function]`,接受用户设置参数对象，和一个应用上下文`context` ,可在应用运行生命周期注册钩子函数。可参考源码中`@vitescv/i18n` 和 `@vitescv/element-ui`模块。
 * **`钩子函数`**
   用户可以在模块初始化方法中，使用钩子来注册应用不同阶段的处理代码
 
@@ -206,13 +206,14 @@ user/_id/posts.vue      # /user/:id/posts
 * **`高级定制模块`**
   模块文件可以是用模板语法，内部可以使用模板语法自定义动态输出. 系统会在编译阶段处理模板，返回真正的模块。 模板中包含两个初始化对象:
 
-  * **cwd** 		          代表项目根目录(process.cwd())
-  * **option**            对象是模块的自定义传入的参数对象,方便定制动态代码
-  * **utils**             对模板内提供了一些常用函数工具对象
-  * **utils.normalPath**  vite的api，用于快平台处理url地址
-  * **utils.resolve**     path的api
+  * **cwd** 		              代表项目根目录(process.cwd())
+  * **option**                对象是模块的自定义传入的参数对象,方便定制动态代码
+  * **utils**                 对模板内提供了一些常用函数工具对象
+  * **utils.normalizePath**   vite的api，用于跨平台处理url地址
+  * **utils.resolve**         path.resolve
+  * **utils.join**            path.join
 
-以下示例参考`@vitescv/i18n`的部分代码
+以下示例参考`@vitescv/i18n`  的部分代码
 
 ```js
 //💡 主文件 modules/xxx/index.js

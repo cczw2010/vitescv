@@ -157,6 +157,7 @@ export function unpluginModules(){
       },
       transform(code,id,option){
         // let moduleInfo = moduleMap.get(id.replace(/^\/@fs/,"").split("?v=")[0])
+        // console.log("transform>>>>>>>>>>",id)
         code = transformedCode(id,code)
         return {
           code,
@@ -171,13 +172,19 @@ const tplModules = `
 <%for(let i=0;i<modules.length ;i++){%>
 import vmodule_<%=modules[i].idx%> from '<%=modules[i].origin%>'
 <%}%>
-export default function(App){
+export default async function(App){
 <%for(let module of modules){%>
-  if(typeof vmodule_<%=module.idx%> == 'function'){
-    vmodule_<%=module.idx%>(<%=JSON.stringify(module.option)%>,App)
-  }
+  await initModule(vmodule_<%=module.idx%>,<%=JSON.stringify(module.option)%>,App)
 <%}%>
-}`
+}
+async function initModule(func,option,App){
+  if(func.toString().startsWith("async")){
+    await func(option,App)
+  }else{
+    func(option,App)
+  }
+}
+`
 
 /**
  * 生成运行时 module，用于插件 transform
@@ -188,7 +195,7 @@ export default function(App){
 function transformedCode(id,code){
   // 可能是从前端直接load的
   let moduleInfo = moduleMap.get(id)
-  // console.debug('>>>>>>>>>[app] load module:',moduleName,moduleInfo)
+  // console.debug('>>>>>>>>>[app] load module:',id,moduleInfo)
   if(moduleInfo){
     try {
       let compiler  = template(code,{
@@ -198,7 +205,8 @@ function transformedCode(id,code){
         imports:{
           utils:{
             normalizePath,
-            resolve
+            resolve,
+            join
           }
         },
         //* 使用 `sourceURL` 选项指定模板的来源URL, 在开发工具的 Sources 选项卡 或 Resources 面板中找到
@@ -211,7 +219,8 @@ function transformedCode(id,code){
       })
       return transformedCode
     } catch (e) {
-      console.error(e)
+      console.error(`[app] ${moduleInfo.origin} compile error:${e.message}`)
+      // console.error(e)
     }
   }
 }

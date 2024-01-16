@@ -50,9 +50,7 @@ Object.defineProperty(Context,'mixins',{
 // Hook准备期执行,主要生成Vue实例的参数并合并，{}
 // 除了mixin会扩展合并mixins，其他属性会覆盖合并，请注意。
 function hookInit(){
-  // 1 初始化模块
-  initModules(Context)
-  // 2 合并各模块
+  // 合并各模块
   for (const hookfunc of Hooks[HookStatus.INIT]) {
     const options = {}
     hookfunc.call(null,options)
@@ -79,19 +77,21 @@ function hookCreated(){
 // =======================================start
 
 // @export 创建应用
-export default function(){
+export default async function(){
   console.debug("[app] init")
   Context.router = createRouter()
-  // 1 Hook,app初始化前 
+  // 1 初始化模块
+  await initModules(Context)
+  // 2 Hook,app初始化前 
   hookInit()
-  // 2 app初始化前 
+  // 3 app初始化前 
   Context.app = new Vue({
     router:Context.router,
     ...Context.options,
     mixins:Context.mixins,
     render: h => h(AppComponent)
   })
-  // 3 app初始化后
+  // 4 app初始化后
   hookCreated()
   console.debug("[app] created")
   return Context

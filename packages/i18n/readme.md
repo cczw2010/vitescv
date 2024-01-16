@@ -17,10 +17,11 @@ import zhLang from "./i18n/zh.json"
 modules:{
   ...
   "@vitescv/i18n":{
-    locale:'zh',             // 默认的语言
+    dir:"i18n",              // 自动加载语言包的默认目录，内部文件名则为语言包名[lang].json
+    locale:'zh',             // * 默认的语言，必填,
     fallbackLocale:'zh',     // 找不到语言包的回滚语言
     silentFallbackWarn:true, // 静默回滚错误
-    messages:{
+    messages:{               // 也可以自己设定，但是改动会触发配置文件改动，dev服务会重启
       "zh":zhLang,
       ...
     }
