@@ -122,12 +122,12 @@ export default function(userConfig){
         //💡 模块预加载，对于ssr很重要
         modulePreload: {
           polyfill: true,
-          resolveDependencies: (filename, deps, { hostId, hostType }) => {
-            console.log(">>>>>>>.resolveDependencies:",filename,hostId,hostType,deps)
-            // if(hostType=='js')
-            //！定制预渲染模块列表，
-            return deps
-          }
+          // resolveDependencies: (filename, deps, { hostId, hostType }) => {
+          //   console.log(">>>>>>>.resolveDependencies:",filename,hostId,hostType,deps)
+          //   // if(hostType=='js')
+          //   //！定制预渲染模块列表，
+          //   return deps
+          // }
         },
         ssr:false,
         commonjsOptions:{
@@ -163,7 +163,6 @@ export default function(userConfig){
         //💡 设置为 true 可以强制依赖预构建，而忽略之前已经缓存过的、已经优化过的依赖。
         force:false,
         // 只有development的时候才使用兼容插件来处理，因为prodction的时候会走rollup的unpluginvModules.vite 会冲突
-        // disabled:'build',
         disabled:'build',
         esbuildOptions:{
           preserveSymlinks:false,
