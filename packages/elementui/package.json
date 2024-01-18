@@ -1,6 +1,6 @@
 {
   "name": "@vitescv/elementui",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "type": "module",
   "main": "index.js",
   "description": "element-ui module for vitescv & vue2.7",
@@ -11,7 +11,7 @@
     ".": "./index.js",
     "./components": "./elementuiesm.js"
   },
-  "devDependencies": {
-    "vue": "^2.7.14"
+  "peerDependencies": {
+    "vitescv":"^2.0.0"
   }
 }

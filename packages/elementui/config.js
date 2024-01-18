@@ -13,7 +13,7 @@ export default {
   UIResolvers:[
     function(option){
       return resolver(option)
-    }    
+    }
   ],
   // 💡 外部化的包
   external:[],

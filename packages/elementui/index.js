@@ -21,6 +21,8 @@ const langs = {}
 <%for(let lang in option.langs){%>
 langs.<%=lang%> =  <%=lang%>_lang
 <%}%>
+// const test = import('element-ui/lib/locale/lang/zh-CN.js')
+// console.log(test)
   
 export default function(option,Context){
   Context.hook("APP:INIT",function(options) {

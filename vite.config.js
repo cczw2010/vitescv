@@ -12,7 +12,6 @@ import { layoutNameKey,pageNameKey} from './src/constants.js'
 
 // 根据用户配置返回vite.config.js配置
 export default function(userConfig){
-  // console.log(userConfig)
   return defineConfig(async ({ command, mode, ssrBuild }) => {
     // const env = loadEnv(mode, process.cwd(), '')
     const moduleConfigs =  await initModules(userConfig.modules)
@@ -21,7 +20,7 @@ export default function(userConfig){
     const unpluginvModules = unpluginModules()
     const isProduction = mode == "production"
 
-    console.log(Config.optimizeInclude)
+    console.log(moduleConfigs)
     // const moduleChunks = Object.assign({
     //   'vue': ['vue'],
     //   // 'vrouter': ['vue-router','virtual:router-routes'],
@@ -46,22 +45,19 @@ export default function(userConfig){
           '@': process.env.__PROJECTROOT,
           '@@vitescv': process.env.__VITESCVROOT,
         },Config.alias),
-        preserveSymlinks: false,
+        preserveSymlinks:false,
         dedupe:["vue"]
       },
       plugins: [
         Config.legacy&&legacy(Config.legacy),
         // Inspect(),
         nodeResolve({
-          preserveSymlinks: false ,
+          preserveSymlinks:false,
           // pnpm的话都在node_modules/.pnpm/node_modules下面
           modulePaths:[
             'node_modules',
             'node_modules/.pnpm/node_modules',
-            // 以下for link
-            resolve(process.env.__VITESCVROOT,'node_modules')
-          ]
-          // .concat(Config.resolveModulePath),
+          ].concat(Config.linkModulePaths),
         }),
         //💡 2.9之前manualChunks默认的策略是将 chunk 分割为 index 和 vendor，之后要手动启动
         splitVendorChunkPlugin(),
@@ -106,7 +102,8 @@ export default function(userConfig){
           directoryAsNamespace: true,
           collapseSamePrefixes: true,
           directives: true,
-          resolvers:Config.UIResolvers
+          resolvers:Config.UIResolvers,
+          version: 2.7,
         })
       ],
       envDir:process.env.__PROJECTROOT,
@@ -125,12 +122,12 @@ export default function(userConfig){
         //💡 模块预加载，对于ssr很重要
         modulePreload: {
           polyfill: true,
-          // resolveDependencies: (filename, deps, { hostId, hostType }) => {
-          //   console.log(">>>>>>>.resolveDependencies:",filename,hostId,hostType,deps)
-          //   // if(hostType=='js')
-          //   //！定制预渲染模块列表，
-          //   return deps
-          // }
+          resolveDependencies: (filename, deps, { hostId, hostType }) => {
+            console.log(">>>>>>>.resolveDependencies:",filename,hostId,hostType,deps)
+            // if(hostType=='js')
+            //！定制预渲染模块列表，
+            return deps
+          }
         },
         ssr:false,
         commonjsOptions:{
@@ -147,21 +144,6 @@ export default function(userConfig){
             // manualChunks(id, { getModuleInfo }) {
             //   // console.log(id,getModuleInfo(id))
             //   if(id.includes('node_modules')){
-            //     for (const key in moduleChunks) {
-            //       let testKey = moduleChunks[key].some(v=>{
-            //         return id.includes(v)
-            //       })
-            //       if(testKey){
-            //         console.log("testKey",id)
-            //       }
-            //       let hasKey = moduleChunks[key].some(v=>{
-            //         return id.includes("node_modules/"+v)
-            //       })
-            //       if(hasKey){
-            //         return key
-            //       }
-            //     }
-            //   }
             // },
           },
         },
@@ -173,12 +155,15 @@ export default function(userConfig){
         //💡 除了input（index.html）文件来检测需要预构建的依赖项外，指定其他入口文件检索
         // entries:[],
         //💡 默认情况下，不在 node_modules 中的，链接的包不会被预构建。使用此选项可强制预构建链接的包。
-        // include:Config.optimizeInclude,
+        include:Config.optimizeInclude,
+        // include:['element-ui/lib/*.js'],
+        // include:['@vitescv/elementui > element-ui'],
         // 💡 排除的预构建，vitescv/app包含虚拟模块，预构建的时候并不存在，会报错
         // exclude:['vitescv/app'],
         //💡 设置为 true 可以强制依赖预构建，而忽略之前已经缓存过的、已经优化过的依赖。
         force:false,
         // 只有development的时候才使用兼容插件来处理，因为prodction的时候会走rollup的unpluginvModules.vite 会冲突
+        // disabled:'build',
         disabled:'build',
         esbuildOptions:{
           preserveSymlinks:false,
@@ -197,7 +182,7 @@ export default function(userConfig){
         watch: {
           // During tests we edit the files too fast and sometimes chokidar
           // misses change events, so enforce polling for consistency
-          ignored: ['**/*.d.ts','../.git','../node_modules','../dist','.DS_Store',process.env.__PROJECTCACHEROOT,outDir],
+          ignored: ['**/*.d.ts','../.git','../node_modules','../dist','**/.DS_Store',process.env.__PROJECTCACHEROOT,outDir],
           ignoreInitial: true,  //很重要，不然会不停重启
           followSymlinks:true,
           include:['config.js'],
@@ -208,8 +193,8 @@ export default function(userConfig){
         fs: {
           allow: [
             // search up for workspace root
-            searchForWorkspaceRoot(process.cwd()),
-          ]
+            searchForWorkspaceRoot(process.env.__PROJECTROOT),
+          ].concat(Config.linkModuleRoots)
         },
       },
     }

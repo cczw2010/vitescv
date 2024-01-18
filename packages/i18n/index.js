@@ -10,6 +10,7 @@
 import VueI18n from 'vue-i18n'
 <%const dir = option.dir||'i18n'%>
 const langsImporter = import.meta.glob("@/<%=(option.dir)||'i18n'%>/*.json")
+console.log(langsImporter)
 // i18n操作类
 class LocaleOperator{
   constructor(options,Contenxt){
@@ -18,7 +19,7 @@ class LocaleOperator{
       const regs = k.match(/\W([a-zA-Z]+\w+)\.json$/i)
       if(regs&&regs.length>1){
         const lang = regs[1]
-        this.dymicImporters[lang] = langsImporter[k]
+        this.dymicImporters[lang] = [langsImporter[k]]
         if(!options.messages[lang]){
           options.messages[lang] = {}
         }
@@ -26,6 +27,7 @@ class LocaleOperator{
     }
     this.langs = Object.keys(this.dymicImporters)
     this.langsLoaded = []
+    this.langsModules
     if(this.langs>0 && this.options.locale){
       this.setLocale
     }
@@ -62,17 +64,18 @@ class LocaleOperator{
     //   return  Promise.resolve(this.setLocale(lang))
     // }
     // 尚未加载
-    return this.dymicImporters[lang]()
-            .then((message)=>{
+    return Promise.all(this.dymicImporters[lang].map(importer=>{
+              return importer()
+              // .catch(e=>{
+              //   console.error('[@vitescv/i18n] '+lang+' is not exited!')
+              //   return false
+              // })
+            })).then((message)=>{
               this.i18n.mergeLocaleMessage(lang,message.default)
               // this.i18n.setLocaleMessage(lang, message.default)
               this.langsLoaded.push(lang)
               return this.setLocale(lang)
             })
-            // .catch(e=>{
-            //   console.error('[@vitescv/i18n] '+lang+' is not exited!')
-            //   return false
-            // })
   }
 }
 

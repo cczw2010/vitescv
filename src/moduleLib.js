@@ -17,11 +17,14 @@ const moduleMap = new Map()
 function initModuleConfigs(){
   Object.assign(moduleConfigs,{
     manualChunks: {},
+    linkModulePaths:[], //link等项目外部包的resolve的node_modules目录
+    linkModuleRoots:[],//link等项目外部包的项目根目录
     external: [],
     UIDirs: [],
     UIResolvers:[],
     alias: {'vue':require.resolve('vue')},
-    optimizeInclude:[]
+    optimizeInclude:[],
+    optimizeExclude:[],
   })
 }
 /**
@@ -35,27 +38,38 @@ export async function initModules(options){
   Object.assign(moduleOptions,options)
   moduleMap.clear()
   initModuleConfigs()
+
+  // 如果是link的vitescv
+  if(!process.env.__VITESCVROOT.startsWith(process.env.__PROJECTROOT)){
+    moduleConfigs.linkModuleRoots.push(process.env.__VITESCVROOT)
+    moduleConfigs.linkModulePaths.push(resolve(process.env.__VITESCVROOT,'node_modules'))
+  }
+
+  const resolvePaths = [
+      join(process.env.__PROJECTROOT,'node_modules'),
+      join(process.env.__PROJECTROOT,'node_modules/.pnpm/node_modules')
+    ]
   for (let moduleName in moduleOptions) {
-    let isPackage = !existsSync(resolve(process.env.__PROJECTROOT,moduleName))
+    let isPackage = !existsSync(resolve(process.env.__PROJECTROOT,moduleName)) //是否安装的包，而不是内部文件
     let moduleIndex = normalizePath(require.resolve(moduleName,{
-      // link调试开发的时候找不到，增加项目根目录
-      paths:[process.env.__PROJECTROOT]
+      paths:resolvePaths
     }))
     if(!moduleIndex){
       console.error(`[vitescv] [${moduleName}] not exit`)
       continue
     }
     try{
-      let dir = dirname(moduleIndex)
+      let dir = getModuleRootPathByIndex(moduleIndex)
       let moduleInfo = {
         idx:moduleMap.size,
         origin:moduleName,
         option: moduleOptions[moduleName]||{},
         source:moduleIndex,
         dir,
-        dst:normalizePath(join(dir,'runtime.js')),
+        // dst:normalizePath(join(dir,'runtime.js')),
         isPackage,
       }
+      moduleConfigs.linkModuleRoots.push(dir)
       //config.js
       let configFile = pathToFileURL(join(moduleInfo.dir,'config.js'))
       // console.log(configFile)
@@ -66,11 +80,18 @@ export async function initModules(options){
             console.error(`[${moduleName}] load config file fail!`,e)
             return null
           })
-        }
+      }
+      // link的时候要把外部包的地址加到reslove的paths里去
+      if(moduleInfo.isPackage && !moduleInfo.source.startsWith(process.env.__PROJECTROOT)){
+        moduleConfigs.linkModulePaths.push(join(moduleInfo.dir,'node_modules'))
+      }
+      // const  = checkModuleLink(moduleInfo,resolvePaths)
+      // Object.assign(moduleConfigs.alias,deps)
 
       if(isPackage){
         moduleConfigs.optimizeInclude.push(moduleName)
       }
+
       moduleMap.set(moduleIndex,moduleInfo)
     }catch(e){
       console.debug(e)
@@ -223,4 +244,16 @@ function transformedCode(id,code){
       // console.error(e)
     }
   }
+}
+
+// 根据入口文件地址获取node_module的位置
+function getModuleRootPathByIndex(fpath){
+  let dir = dirname(fpath)
+  if(dir){
+    if(!existsSync(join(dir,'node_modules'))){
+      return getModuleRootPathByIndex(dir)
+    }
+    return dir
+  }
+  return null
 }

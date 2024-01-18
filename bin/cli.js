@@ -6,16 +6,16 @@ import { existsSync,copyFileSync,constants as FsConstants,mkdirSync,rmSync} from
 import { fileURLToPath } from "url"
 import { createServer as createViteServer,build,preview} from 'vite'
 // import chokidar from "chokidar";
-
-// vitescv 根目录
-process.env.__VITESCVROOT = fileURLToPath(new URL("../",import.meta.url))
 // 项目根目录
 process.env.__PROJECTROOT = process.cwd()
 // 项目中vitescv的项目文件
-process.env.__PROJECTCACHEROOT = resolve('./.vitescv')
+// process.env.__PROJECTCACHEROOT = resolve('./.vitescv')
+process.env.__PROJECTCACHEROOT = resolve(process.env.__PROJECTROOT,'node_modules','.vitescv')
+// vitescv 根目录
+process.env.__VITESCVROOT = fileURLToPath(new URL("../",import.meta.url))
+// process.env.__VITESCVROOT = resolve(process.env.__PROJECTROOT,'node_modules','vitescv')
 
 const viteConfigPath = resolve(process.env.__PROJECTCACHEROOT,'vite.config.js')
-
 const isInit = existsSync(process.env.__PROJECTCACHEROOT)
 
 switch (process.argv[2]) {
