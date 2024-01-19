@@ -159,7 +159,7 @@ export default function(userConfig){
         // include:['element-ui/lib/*.js'],
         // include:['@vitescv/elementui > element-ui/lib/*.js'],
         // 💡 排除的预构建，vitescv/app包含虚拟模块，预构建的时候并不存在，会报错
-        // exclude:['vitescv/app'],
+        exclude:['vitescv/app'],  //npm link安装的时候不报错，正常里面引用的虚拟模块报错
         //💡 设置为 true 可以强制依赖预构建，而忽略之前已经缓存过的、已经优化过的依赖。
         force:false,
         // 只有development的时候才使用兼容插件来处理，因为prodction的时候会走rollup的unpluginvModules.vite 会冲突
