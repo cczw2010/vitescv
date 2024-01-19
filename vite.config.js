@@ -184,7 +184,7 @@ export default function(userConfig){
           ignored: ['**/*.d.ts','../.git','../node_modules','../dist','**/.DS_Store',process.env.__PROJECTCACHEROOT,outDir],
           ignoreInitial: true,  //很重要，不然会不停重启
           followSymlinks:true,
-          include:['config.js'],
+          // include:[],
           // ↓ windows文件在wsl上运行时，开启
           // usePolling: true,
           interval: 200,
