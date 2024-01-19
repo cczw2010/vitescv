@@ -44,29 +44,23 @@ export async function initModules(options){
     moduleConfigs.linkModuleRoots.push(process.env.__VITESCVROOT)
     moduleConfigs.linkModulePaths.push(resolve(process.env.__VITESCVROOT,'node_modules'))
   }
-
-  const resolvePaths = [
-      join(process.env.__PROJECTROOT,'node_modules'),
-      join(process.env.__PROJECTROOT,'node_modules/.pnpm/node_modules')
-    ]
   for (let moduleName in moduleOptions) {
     let isPackage = !existsSync(resolve(process.env.__PROJECTROOT,moduleName)) //是否安装的包，而不是内部文件
     let moduleIndex = normalizePath(require.resolve(moduleName,{
-      paths:resolvePaths
+      paths:[process.env.__PROJECTROOT]
     }))
     if(!moduleIndex){
       console.error(`[vitescv] [${moduleName}] not exit`)
       continue
     }
     try{
-      let dir = getModuleRootPathByIndex(moduleIndex)
+      let dir = getModuleRootPathByIndex(moduleIndex,moduleName,isPackage,!moduleIndex.startsWith(process.env.__PROJECTROOT))
       let moduleInfo = {
         idx:moduleMap.size,
         origin:moduleName,
         option: moduleOptions[moduleName]||{},
         source:moduleIndex,
         dir,
-        // dst:normalizePath(join(dir,'runtime.js')),
         isPackage,
       }
       moduleConfigs.linkModuleRoots.push(dir)
@@ -85,8 +79,6 @@ export async function initModules(options){
       if(moduleInfo.isPackage && !moduleInfo.source.startsWith(process.env.__PROJECTROOT)){
         moduleConfigs.linkModulePaths.push(join(moduleInfo.dir,'node_modules'))
       }
-      // const  = checkModuleLink(moduleInfo,resolvePaths)
-      // Object.assign(moduleConfigs.alias,deps)
 
       if(isPackage){
         moduleConfigs.optimizeInclude.push(moduleName)
@@ -246,12 +238,19 @@ function transformedCode(id,code){
   }
 }
 
-// 根据入口文件地址获取node_module的位置
-function getModuleRootPathByIndex(fpath){
-  let dir = dirname(fpath)
+// 获取模块的根目录
+function getModuleRootPathByIndex(moduleIndex,moduleName,isPackage,isLink){
+  let dir = dirname(moduleIndex)
+  if(!isPackage){
+    return dir
+  }
   if(dir){
-    if(!existsSync(join(dir,'node_modules'))){
-      return getModuleRootPathByIndex(dir)
+    if(isLink){
+      if(!existsSync(resolve(dir,'package.json'))){
+        return getModuleRootPathByIndex(dir,moduleName,isPackage,isLink)
+      }
+    }else if(!dir.endsWith(moduleName)){
+      return getModuleRootPathByIndex(dir,moduleName,isPackage,isLink)
     }
     return dir
   }
