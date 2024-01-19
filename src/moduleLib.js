@@ -24,7 +24,6 @@ function initModuleConfigs(){
     UIResolvers:[],
     alias: {'vue':require.resolve('vue')},
     optimizeInclude:[],
-    optimizeExclude:[],
   })
 }
 /**
@@ -45,16 +44,17 @@ export async function initModules(options){
     moduleConfigs.linkModulePaths.push(resolve(process.env.__VITESCVROOT,'node_modules'))
   }
   for (let moduleName in moduleOptions) {
-    let isPackage = !existsSync(resolve(process.env.__PROJECTROOT,moduleName)) //是否安装的包，而不是内部文件
     let moduleIndex = normalizePath(require.resolve(moduleName,{
       paths:[process.env.__PROJECTROOT]
     }))
+    let isPackage = !existsSync(resolve(process.env.__PROJECTROOT,moduleName))     //是否安装外部的包，而不是内部文件
+    let isLink = isPackage && !moduleIndex.startsWith(process.env.__PROJECTROOT)   //是否用npm link安装的项目外部测试包
     if(!moduleIndex){
       console.error(`[vitescv] [${moduleName}] not exit`)
       continue
     }
     try{
-      let dir = getModuleRootPathByIndex(moduleIndex,moduleName,isPackage,!moduleIndex.startsWith(process.env.__PROJECTROOT))
+      let dir = getModuleRootPathByIndex(moduleIndex,moduleName,isPackage,isLink)
       let moduleInfo = {
         idx:moduleMap.size,
         origin:moduleName,
@@ -79,11 +79,6 @@ export async function initModules(options){
       if(moduleInfo.isPackage && !moduleInfo.source.startsWith(process.env.__PROJECTROOT)){
         moduleConfigs.linkModulePaths.push(join(moduleInfo.dir,'node_modules'))
       }
-
-      if(isPackage){
-        moduleConfigs.optimizeInclude.push(moduleName)
-      }
-
       moduleMap.set(moduleIndex,moduleInfo)
     }catch(e){
       console.debug(e)

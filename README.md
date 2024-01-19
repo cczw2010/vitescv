@@ -267,6 +267,8 @@ export default {
   external:[],
   // 💡 扩展vite.config.js的rollupOptions.output.manualChunks设置项,!!!该项，2.0.0更换为vite5之后，该项已经失效
   manualChunks:{},
+  // 💡 扩展vite.config.optimizeDeps.include，适当的讲内部的依赖预渲染可以提高项目初始化速度
+  optimizeInclude:[]
 }
 
 ```

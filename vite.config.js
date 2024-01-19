@@ -20,7 +20,7 @@ export default function(userConfig){
     const unpluginvModules = unpluginModules()
     const isProduction = mode == "production"
 
-    console.log(moduleConfigs)
+    // console.log(moduleConfigs)
     // const moduleChunks = Object.assign({
     //   'vue': ['vue'],
     //   // 'vrouter': ['vue-router','virtual:router-routes'],
@@ -155,9 +155,9 @@ export default function(userConfig){
         //💡 除了input（index.html）文件来检测需要预构建的依赖项外，指定其他入口文件检索
         // entries:[],
         //💡 默认情况下，不在 node_modules 中的，链接的包不会被预构建。使用此选项可强制预构建链接的包。
-        // include:Config.optimizeInclude,
+        include:Config.optimizeInclude,
         // include:['element-ui/lib/*.js'],
-        // include:['@vitescv/elementui > element-ui'],
+        // include:['@vitescv/elementui > element-ui/lib/*.js'],
         // 💡 排除的预构建，vitescv/app包含虚拟模块，预构建的时候并不存在，会报错
         // exclude:['vitescv/app'],
         //💡 设置为 true 可以强制依赖预构建，而忽略之前已经缓存过的、已经优化过的依赖。

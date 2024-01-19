@@ -17,7 +17,6 @@ export default {
   ],
   // 💡 外部化的包
   external:[],
-  // 💡 扩展vite.config.js的rollupOptions.output.manualChunks设置项
-  manualChunks:{'elementui': ['element-ui','@vitescv/elementui']},
+  optimizeInclude:['@vitescv/elementui/components']
 }
 
