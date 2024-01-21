@@ -68,7 +68,9 @@ class LocaleOperator{
               importer = importer()
             }
             if(importer instanceof Promise){
-              return importer.then(m=>m.default).catch(e=>{
+              return importer.then(m=>{
+                return m.default?m.default.__esModule?m.default.default:m.default:m
+              }).catch(e=>{
                 console.error('[@vitescv/i18n] '+e.message)
                 return false
               })
