@@ -17,13 +17,13 @@ pnpm add @vitescv/vuetify
 modules:{
   ...
   "@vitescv/vuetify":{
-     // 与i18n的语言包映射关系
+     // 与i18n的语言包映射关系,模块会自动根据这些配置导入对应的语言包
     "langs":{
       'en':'en',
       'zh':'zh-Hans',
       ...
     },
-    // vuetify的初始化配置，lang部分已经自动根据上面的配置处理了,无需处理
+    // vuetify的初始化配置，lang部分已经自动根据上面的配置自动处理了,如果自行设置会覆盖原有的自动处理
     "option":{
       ...
     }

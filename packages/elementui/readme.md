@@ -16,7 +16,7 @@ pnpm add @vitescv/elementui
 modules:{
   ...
   "@vitescv/elementui":{
-    // 与i18n的语言包映射关系
+    // 与@vitecv/i18n的语言包映射关系
     "langs":{
       'en':'en',
       'zh':'zh-CN',

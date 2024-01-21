@@ -1,5 +1,5 @@
 /**
- * Element-ui for vitescv & vue2  
+ * vuetify for vitescv & vue2  
  * 配置信息可选，主要是设置多语言，依赖于vue-i18n 如下
  * @param option
  *  {
@@ -11,43 +11,26 @@
  */
 import Vuetify from 'vuetify/lib'
 import 'vuetify/dist/vuetify.min.css'
-<%option = option ||{langs:{}}%>
+const importers = {
+<%if(option.langs){%>
 <%for(let lang in option.langs){%>
-import <%=lang%>_lang from 'vuetify/lib/locale/<%=option.langs[lang]%>'
+  <%=lang%>:()=>import("vuetify/lib/locale/<%=option.langs[lang]%>.js").then(m=>{return {default:{'$vuetify':m.default}}}),
 <%}%>
-const langs = {}
-<%for(let lang in option.langs){%>
-langs.<%=lang%> =  <%=lang%>_lang
 <%}%>
+}
 
-export default function(option,{Vue,hook}){
-  option = Object.assign({
-    langs:{'en':'en'}
-  },option)
-  Vue.use(Vuetify)
-  hook("APP:INIT",function(options) {
-    const vuetify = new Vuetify(Object.assign(option,{
+export default function(option,Context){
+  Context.Vue.use(Vuetify)
+  Context.I18n.setLocaleMessages(importers)
+  Context.hook("APP:INIT",function(options) {
+    const optionVuetify = Object.assign({
       lang: {
-        locales: langs,
-        current: 'en',
+        t: (key, ...params) => Context.I18n.i18n.t(key, params),
       },
-    }))
+    },option.option)
+    const vuetify = new Vuetify(optionVuetify)
     Object.assign(options,{
       vuetify,
-      mixin:{
-        created(){
-          if(this.$i18n){
-            this.$vuetify.lang.current = this.$i18n.locale
-          }
-        },
-        watch:{
-          '$i18n.locale'(newLocal) {
-            this.$vuetify.lang.current = newLocal
-          }
-        }
-      }
     })
   })
-  // hook("APP:created",function(options) {
-  // })
 }

@@ -13,18 +13,16 @@
  *  }
  */
 import localElement from 'element-ui/lib/locale'
-<%option = option ||{}%>
+const importers = {
+<%if(option.langs){%>
 <%for(let lang in option.langs){%>
-import <%=lang%>_lang from 'element-ui/lib/locale/lang/<%=option.langs[lang]%>'
+  <%=lang%>:()=>import("element-ui/lib/locale/lang/<%=option.langs[lang]%>.js"),
 <%}%>
-const langs = {}
-<%for(let lang in option.langs){%>
-langs.<%=lang%> =  <%=lang%>_lang
 <%}%>
-// const test = import('element-ui/lib/locale/lang/zh-CN.js')
-// console.log(test)
-  
+}
 export default function(option,Context){
+  Context.I18n.setLocaleMessages(importers)
+  
   Context.hook("APP:INIT",function(options) {
     Object.assign(options,{
       mixin:{
@@ -32,17 +30,10 @@ export default function(option,Context){
           if(this.$i18n){
             // 💡 第一种方法是借助vuei8n来实现
             localElement.i18n((key, value) => this.$i18n.t(key, value))
-            this.$i18n.mergeLocaleMessage(this.$i18n.locale,langs[this.$i18n.locale])
             // 💡 第二种方法自己设置语言包,但是前端切换语言的时候elementui重绘前会有延迟
             // localElement.use(langs[this.$i18n.locale])
           }
         },
-        watch:{
-          '$i18n.locale'(newLocal) {
-            this.$i18n.mergeLocaleMessage(newLocal,langs[newLocal])
-            // localElement.use(langs[newLocal])
-          }
-        }
       }
     })
   })
