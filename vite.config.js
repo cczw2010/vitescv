@@ -150,7 +150,8 @@ export default function(userConfig){
         //💡 览器兼容目标,使用plugin-legacy 就不用设置了
         // target:"modules",
       },
-      // 预构建还是关掉了，module开发中太多定制化，会引起各种问题，比如呗预构建载入了子包内的vue引起vue多实例，
+      //💡开发期间模块也做预处理，因为不预处理的话一些内部的依赖无法被预处理，导致commonsjs等问题。
+      //  但是模块很多是模板动态的，就导致一些模块配置改变后必须被实时重构，所以这里force为true. 每次配置改变和重启dev服务都会重新预构建
       optimizeDeps:{
         //💡 除了input（index.html）文件来检测需要预构建的依赖项外，指定其他入口文件检索
         // entries:[],
@@ -161,7 +162,7 @@ export default function(userConfig){
         // 💡 排除的预构建，vitescv/app包含虚拟模块，预构建的时候并不存在，会报错
         exclude:['vitescv/app'],  //npm link安装的时候不报错，正常里面引用的虚拟模块报错
         //💡 设置为 true 可以强制依赖预构建，而忽略之前已经缓存过的、已经优化过的依赖。
-        force:false,
+        force:true,
         // 只有development的时候才使用兼容插件来处理，因为prodction的时候会走rollup的unpluginvModules.vite 会冲突
         disabled:'build',
         esbuildOptions:{
