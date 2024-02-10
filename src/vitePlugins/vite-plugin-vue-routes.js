@@ -253,8 +253,11 @@ class RouteModule{
   // 生成并返回routes虚拟模块的js源码，
   generateModuleSource(){
     const compiled = template(this.routesTpl)
+    const routes = Array.from(this.routes.values())
+    // 排序是为了让[:]动态路由在后面
+    routes.sort((a,b)=>a.path>b.path?-1:1)
     return compiled({
-        routes:Array.from(this.routes.values()),
+        routes,
         option:this.option,
         development:this.development,
         layoutNameKey,pageNameKey
