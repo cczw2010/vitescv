@@ -6,14 +6,14 @@ import AppError from '<%=option.componentError%>'
 Vue.component("AppLoading",AppLoading)
 Vue.component("AppView",AppView)
 Vue.component("AppError",AppError)
-const isServer = import.meta.env.SSR
+// const isServer = import.meta.env.SSR
 // const startPage = isServer?null:location.pathname
 // ==== 异步组件 + 异步路由组装
 // https://stackoverflow.com/questions/54476294/using-async-components-with-loading-and-error-components-in-vue-router
 const lazyLoadRoute = (asyncView,routePath,alias) => {
-  if(isServer){
-    return asyncView
-  }
+  // if(isServer){
+  //   return asyncView
+  // }
 
   // 3 CSR&SSR模式，运行时是CSR的就返回异步路由+异步组件
   // vue3 or vue2.7 async router

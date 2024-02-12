@@ -9,7 +9,7 @@
  */ 
 import VueI18n from 'vue-i18n'
 <%const dir = option.dir||'i18n'%>
-const langsImporter = import.meta.glob("@/<%=(option.dir)||'i18n'%>/*.json")
+const langsImporter = import.meta.glob("@/<%=dir||'i18n'%>/*.json")
 // console.log(langsImporter)
 // i18n操作类
 class LocaleOperator{

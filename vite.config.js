@@ -43,6 +43,7 @@ export default function(userConfig){
       resolve: {
         alias: Object.assign({
           '@': process.env.__PROJECTROOT,
+          '$': process.env.__PROJECTCACHEROOT,
           '@@vitescv': process.env.__VITESCVROOT,
         },Config.alias),
         preserveSymlinks:false,
@@ -164,7 +165,7 @@ export default function(userConfig){
         //💡 设置为 true 可以强制依赖预构建，而忽略之前已经缓存过的、已经优化过的依赖。
         force:true,
         // 只有development的时候才使用兼容插件来处理，因为prodction的时候会走rollup的unpluginvModules.vite 会冲突
-        disabled:'build',
+        // disabled:'build',
         esbuildOptions:{
           preserveSymlinks:false,
           sourcemap: false,

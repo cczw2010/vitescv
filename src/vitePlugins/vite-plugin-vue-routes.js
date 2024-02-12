@@ -1,5 +1,5 @@
 import {resolve,join, relative,extname,parse as pathParse} from "path"
-import fse from "fs-extra"
+import {readFileSync,readdirSync,statSync,writeFileSync} from "fs"
 import {parseComponent as parseSFC} from "vue/compiler-sfc"
 import template from "lodash.template"
 import hash from "hash-sum"
@@ -8,9 +8,6 @@ import {parse as acornParse} from "acorn"
 import {walk} from "estree-walker"
 import { layoutNameKey,pageNameKey } from "../constants.js"
 
-
-const virtualModuleRouteId = 'virtual:router-routes'
-const resolvedVirtualModuleRouteId = '\0'+virtualModuleRouteId
 const defaultOption = {
   pageRoot:'view/pages',
   layoutRoot:'view/layouts',
@@ -63,23 +60,8 @@ export default function (option) {
     configureServer(server) {
       builder.setDevServer(server)
     },
-    // resolve routes模块请求
-    resolveId(id) {
-      if (id === virtualModuleRouteId) {
-        return resolvedVirtualModuleRouteId
-      }
-      return null
-    },
-    load(id) {
-      if (id === resolvedVirtualModuleRouteId) {
-        const routes = builder.generateModuleSource()
-        // console.info(">>>>>virtual:router-routes",routes)
-        return routes
-      }
-      return null
-    },
     transform(source,id){
-      // 最终返回代码处理
+      // 处理page and layout
       return builder.transformCode(source,id)
     }
   }
@@ -96,7 +78,8 @@ class RouteModule{
     this.development = viteConfig.mode=='development'
     this.routes = new Map()
     this.layouts = new Map()
-    this.routesTpl = fse.readFileSync(new URL("./routes.js",import.meta.url),'utf-8')
+    this.routesTpl = readFileSync(new URL("./routeTpl.js",import.meta.url),'utf-8')
+    this.runtimePath = join(process.env.__PROJECTCACHEROOT,'routes.runtime.js')
     // layouts
     this._travel(this.option.layoutRoot,fpath=>{
       this.setLayout(fpath)
@@ -105,14 +88,12 @@ class RouteModule{
     this._travel(this.option.pageRoot,fpath=>{
       this.setRoute(fpath)
     })
+    this.generateModuleSource()
   }
   // 设置开发服务器  for dev
   setDevServer(server){
-    this._devServer = server
     server.watcher.add([this.option.layoutRoot,this.option.pageRoot])
-    server.watcher.on("ready",()=>{
-      // console.debug(">>>>>>server.wathcer",server.watcher.getWatched())
-      server.watcher
+    server.watcher
       .on('add', fpath => {
         if(this.isPage(fpath)){
           this.setRoute(fpath,true)
@@ -133,24 +114,10 @@ class RouteModule{
           this.removeLayout(fpath,true)
         }
       })
-    })
   }
   // 刷新 module  dev  
-  reloadModule(){
-    if(this._devServer){
-      const {moduleGraph,ws} = this._devServer
-      const module = moduleGraph.getModuleById(resolvedVirtualModuleRouteId)
-      // console.debug(">>>module",module)
-      if(module){
-        this._devServer.reloadModule(module)
-        // moduleGraph.invalidateModule(module)
-        // if (ws) {
-        //   ws.send({
-        //     type: 'full-reload',
-        //   })
-        // }
-      }
-    }
+  refreshModule(){
+    this.generateModuleSource()
   }
   // 是不是page
   isPage(fpath){
@@ -171,7 +138,7 @@ class RouteModule{
         asyncData:sfc.result.asyncData
       })
       if(reload){
-        this.reloadModule()
+        this.refreshModule()
       }
     }catch(e){
       console.error(`[app] layout loaded error:${pagePath}`,e)
@@ -183,10 +150,10 @@ class RouteModule{
   }
   removeLayout(pagePath){
     this.layouts.delete(pagePath)
-    this.reloadModule()
+    this.refreshModule()
   }
-  // 新增一个页面路由，reloadModule的情况有两个，
-  // 1 参数reload设置为true，强制reload 
+  // refreshModule的情况有两个，
+  // 1 参数reload设置为true，重构模块代码
   // 2 如果路由之前存在，则判断是否路由的数据信息变更了，变更了则一定会重载路由模块
   setRoute(pagePath,reload=false){
     const pathObj = pathParse(pagePath)
@@ -240,7 +207,7 @@ class RouteModule{
       layout:_layoutPath,
     })
     if(reload){
-      this.reloadModule()
+      this.refreshModule()
     }
   }
   getRoute(pagePath){
@@ -248,7 +215,7 @@ class RouteModule{
   }
   removeRoute(pagePath){
     this.routes.delete(pagePath)
-    this.reloadModule()
+    this.refreshModule()
   }
   // 生成并返回routes虚拟模块的js源码，
   generateModuleSource(){
@@ -256,12 +223,14 @@ class RouteModule{
     const routes = Array.from(this.routes.values())
     // 排序是为了让[:]动态路由在后面
     routes.sort((a,b)=>a.path>b.path?-1:1)
-    return compiled({
+    const source = compiled({
         routes,
         option:this.option,
         development:this.development,
         layoutNameKey,pageNameKey
       })
+    writeFileSync(this.runtimePath,source)
+    return source
   }
   // page或者layout最终输出code处理
   transformCode(source,id){
@@ -284,13 +253,13 @@ class RouteModule{
   }
   // 遍历加载routes
   _travel(dir,cb) {
-    const files = fse.readdirSync(dir)
+    const files = readdirSync(dir)
     // 默认按照字母正序，而_开头的泛域名在最前
     // files.reverse()
     for (const k in files) {
       const file = files[k];
       const fpath = join(dir, file)
-      const stats = fse.statSync(fpath)
+      const stats = statSync(fpath)
       if (stats.isDirectory()) {
         this._travel(fpath,cb);
       } else if(fpath.endsWith(this.option.sfcExt)){
@@ -304,7 +273,7 @@ class RouteModule{
 // return {source,result}
 function checkSFC(source,isCode){
   if(!isCode){
-    source = fse.readFileSync(source,"utf-8")
+    source = readFileSync(source,"utf-8")
   }
   const sfc = parseSFC(source);
   const result = {layout:false,asyncData:false,head:false,name:false,alias:false}
