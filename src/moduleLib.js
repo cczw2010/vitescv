@@ -2,7 +2,7 @@ import { createRequire } from "module"
 import {pathToFileURL} from "url"
 import {normalizePath} from "vite"
 import { dirname,resolve,join} from "path"
-import { existsSync} from "fs"
+import { existsSync,writeFileSync,mkdirSync,readFileSync} from "fs"
 import { createUnplugin } from 'unplugin'
 import template from "lodash.template"
 
@@ -13,18 +13,12 @@ const moduleOptions = {}
 const moduleConfigs = {}
 // 模块信息map
 const moduleMap = new Map()
+// modules的runtime文件地址
+const runtimeModuleIndex = 'index.js'
+const runtimeModuleDir = join(process.env.__PROJECTCACHEROOT,'modules')
 
-function initModuleConfigs(){
-  Object.assign(moduleConfigs,{
-    manualChunks: {},
-    linkModulePaths:[], //link等项目外部包的resolve的node_modules目录
-    linkModuleRoots:[],//link等项目外部包的项目根目录
-    external: [],
-    UIDirs: [],
-    UIResolvers:[],
-    alias: {'vue':require.resolve('vue')},
-    optimizeInclude:[],
-  })
+if(!existsSync(runtimeModuleDir)){
+  mkdirSync(runtimeModuleDir)
 }
 /**
  * 初始化 modules 配置, 返回整理后的模块配置集合
@@ -36,7 +30,16 @@ function initModuleConfigs(){
 export async function initModules(options){
   Object.assign(moduleOptions,options)
   moduleMap.clear()
-  initModuleConfigs()
+  Object.assign(moduleConfigs,{
+    manualChunks: {},
+    linkModulePaths:[], //link等项目外部包的resolve的node_modules目录
+    linkModuleRoots:[],//link等项目外部包的项目根目录
+    external: [],
+    UIDirs: [],
+    UIResolvers:[],
+    alias: {'vue':require.resolve('vue')},
+    optimizeInclude:[],
+  })
 
   // 如果是link的vitescv
   if(!process.env.__VITESCVROOT.startsWith(process.env.__PROJECTROOT)){
@@ -54,18 +57,27 @@ export async function initModules(options){
       continue
     }
     try{
-      let dir = getModuleRootPathByIndex(moduleIndex,moduleName,isPackage,isLink)
+      let sourceDir = getModuleRootPathByIndex(moduleIndex,moduleName,isPackage,isLink)
+      let idx = moduleMap.size
+      let dstName = `module-${idx}.runtime.js`
       let moduleInfo = {
-        idx:moduleMap.size,
+        idx,
         origin:moduleName,
         option: moduleOptions[moduleName]||{},
+        sourceDir,
         source:moduleIndex,
-        dir,
+        dstName,
         isPackage,
       }
-      moduleConfigs.linkModuleRoots.push(dir)
+      moduleMap.set(moduleIndex,moduleInfo)
+
+      moduleConfigs.linkModuleRoots.push(sourceDir)
+      // module index.js
+      let moduleSourceCode = readFileSync(moduleIndex).toString()
+      transformModuleSource(moduleIndex,moduleSourceCode)
+      
       //config.js
-      let configFile = pathToFileURL(join(moduleInfo.dir,'config.js'))
+      let configFile = pathToFileURL(join(moduleInfo.sourceDir,'config.js'))
       // console.log(configFile)
       if(existsSync(configFile)){
         await import(configFile).then(m=>{
@@ -77,14 +89,14 @@ export async function initModules(options){
       }
       // link的时候要把外部包的地址加到reslove的paths里去
       if(moduleInfo.isPackage && !moduleInfo.source.startsWith(process.env.__PROJECTROOT)){
-        moduleConfigs.linkModulePaths.push(join(moduleInfo.dir,'node_modules'))
+        moduleConfigs.linkModulePaths.push(join(moduleInfo.sourceDir,'node_modules'))
       }
-      moduleMap.set(moduleIndex,moduleInfo)
     }catch(e){
       console.debug(e)
     }
   }
   // console.log(moduleMap)
+  transformModuleIndexSource()
   return moduleConfigs
 }
 
@@ -124,83 +136,36 @@ function tidyModuleConfig(moduleConfig,moduleOption){
   }
 }
 
-//////////////////////////////////////////////////////////////////  plugin
-/**
- * 全局可编译vue module模块加载，在app创建期间调用，可用于加载一些定制的模块初始化，返回一个对象，包含minxins数组和options对象,并作为注入对象注入到app创建参数对象中
- * 模块文件可以为模板文件，多个模块的值注意覆盖问题
- * 模块文件内部用import.meta.env.DEV来判断是不是开发模式（见vite环境变量）
- * 
- * @export  unplugin modules
- */
-export function unpluginModules(){
-  const virtualModuleRouteId = 'virtual:modules'
-  const resolvedVirtualModuleRouteId = '\0'+virtualModuleRouteId
-  
-  return createUnplugin((UserOptions, meta) => {
-    // 根据模块配置生成子动态模块
-    return {
-      name: 'unplugin-vue-modules',
-      enforce: 'pre',
-      resolveId(id,importer,option) {
-        if (id === virtualModuleRouteId) {
-          return resolvedVirtualModuleRouteId
-        }
-        return null
-      },
-      load(id,option) {
-        if (id === resolvedVirtualModuleRouteId) {
-          // 根据配置加载全局modules
-          if(!moduleMap.size){
-            return 'export default null'
-          }
-          let compiler  = template(tplModules)
-          return compiler({modules:Array.from(moduleMap.values())})
-        }
-        return null
-      },
-      transformInclude(id){
-        if(moduleMap.has(id)){
-          return true
-        }
-      },
-      transform(code,id,option){
-        // let moduleInfo = moduleMap.get(id.replace(/^\/@fs/,"").split("?v=")[0])
-        // console.log("transform>>>>>>>>>>",id)
-        code = transformedCode(id,code)
-        return {
-          code,
-          map: { mappings: '' }
-        }
-      }
-    }
-  })
-}
-// 两次forof 索引会出问题  🙈
-const tplModules = `
-<%for(let i=0;i<modules.length ;i++){%>
-import vmodule_<%=modules[i].idx%> from '<%=modules[i].origin%>'
-<%}%>
-export default async function(App){
-<%for(let module of modules){%>
-  await initModule(vmodule_<%=module.idx%>,<%=JSON.stringify(module.option)%>,App)
-<%}%>
-}
-async function initModule(func,option,App){
-  if(func.toString().startsWith("async")){
-    await func(option,App)
-  }else{
-    func(option,App)
+// 生成模块入口运行时文件
+function transformModuleIndexSource(){
+  let compiler  = template(`
+  <%for(let i=0;i<modules.length ;i++){%>
+  import vmodule_<%=modules[i].idx%> from './module-<%=modules[i].idx%>.runtime.js'
+  <%}%>
+  export default async function(App){
+  <%for(let module of modules){%>
+    await initModule(vmodule_<%=module.idx%>,<%=JSON.stringify(module.option)%>,App)
+  <%}%>
   }
+  async function initModule(func,option,App){
+    if(func.toString().startsWith("async")){
+      await func(option,App)
+    }else{
+      func(option,App)
+    }
+  }`)
+  const source = compiler({modules:Array.from(moduleMap.values())})
+  writeFileSync(join(runtimeModuleDir,runtimeModuleIndex),source)
+  return  source
 }
-`
 
 /**
- * 生成运行时 module，用于插件 transform
+ * 生成运行时 module
  * @param {*} id  插件中的id, 文件path
  * @param {*} code 代码
  * @returns 
  */
-function transformedCode(id,code){
+function transformModuleSource(id,code){
   // 可能是从前端直接load的
   let moduleInfo = moduleMap.get(id)
   // console.debug('>>>>>>>>>[app] load module:',id,moduleInfo)
@@ -225,9 +190,11 @@ function transformedCode(id,code){
         cwd:process.cwd(),
         // ENV:process.env,
       })
+      writeFileSync(join(runtimeModuleDir,moduleInfo.dstName),transformedCode)
       return transformedCode
     } catch (e) {
       console.error(`[app] ${moduleInfo.origin} compile error:${e.message}`)
+      return null
       // console.error(e)
     }
   }

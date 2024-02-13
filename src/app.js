@@ -2,9 +2,8 @@
 
 import Vue from 'vue'
 import AppComponent from "./App.vue"
-import initModules from "virtual:modules"
+import initModules from "$/modules/index.js"
 import createRouter from './router.js'
-
 //@Const 钩子名称
 const HookStatus = {
   INIT:'APP:INIT',            //App初始化之前：cb{$App,options,Vue}

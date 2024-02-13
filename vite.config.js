@@ -7,7 +7,7 @@ import Components from 'unplugin-vue-components/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import vueRoutes from "./src/vitePlugins/vite-plugin-vue-routes.js"
 import vueOptions from "./src/vitePlugins/vite-plugin-vue-options.js"
-import {initModules,unpluginModules} from "./src/moduleLib.js"
+import {initModules} from "./src/moduleLib.js"
 import { layoutNameKey,pageNameKey} from './src/constants.js'
 
 // 根据用户配置返回vite.config.js配置
@@ -17,7 +17,6 @@ export default function(userConfig){
     const moduleConfigs =  await initModules(userConfig.modules)
     const Config = Object.assign({},userConfig,moduleConfigs)
     const outDir = resolve(process.env.__PROJECTROOT,Config.outDir)
-    const unpluginvModules = unpluginModules()
     const isProduction = mode == "production"
 
     // console.log(moduleConfigs)
@@ -71,7 +70,6 @@ export default function(userConfig){
           exclude:null,
           options:{[layoutNameKey]:true},
         }]),
-        unpluginvModules.vite(),
         vueRoutes({
           pageRoot:`${Config.source}/pages`,
           layoutRoot:`${Config.source}/layouts`,
@@ -158,20 +156,12 @@ export default function(userConfig){
         // entries:[],
         //💡 默认情况下，不在 node_modules 中的，链接的包不会被预构建。使用此选项可强制预构建链接的包。
         include:Config.optimizeInclude,
-        // include:['element-ui/lib/*.js'],
-        // include:['@vitescv/elementui > element-ui/lib/*.js'],
         // 💡 排除的预构建，vitescv/app包含虚拟模块，预构建的时候并不存在，会报错
-        exclude:['vitescv/app'],  //npm link安装的时候不报错，正常里面引用的虚拟模块报错
+        // exclude:[],  //npm link安装的时候不报错，正常里面引用的虚拟模块报错
         //💡 设置为 true 可以强制依赖预构建，而忽略之前已经缓存过的、已经优化过的依赖。
-        force:true,
+        force:false,
         // 只有development的时候才使用兼容插件来处理，因为prodction的时候会走rollup的unpluginvModules.vite 会冲突
         // disabled:'build',
-        esbuildOptions:{
-          preserveSymlinks:false,
-          sourcemap: false,
-          // sourcesContent: false,
-          plugins:[unpluginvModules.esbuild()]
-        }
       },
       preview:{
         port:Config.port,
