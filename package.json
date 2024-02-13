@@ -39,7 +39,6 @@
     "acorn": "^8.11.3",
     "core-js": "^3.35.0",
     "estree-walker": "^3.0.3",
-    "fs-extra": "^11.2.0",
     "hash-sum": "^2.0.0",
     "lodash.template": "^4.5.0",
     "magic-string": "^0.26.7",
