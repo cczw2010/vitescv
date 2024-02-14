@@ -8,8 +8,7 @@
  * silentFallbackWarn:true, // 静默回滚错误
  */ 
 import VueI18n from 'vue-i18n'
-<%const dir = option.dir||'i18n'%>
-const langsImporter = import.meta.glob("@/<%=dir||'i18n'%>/*.json")
+const langsImporter = import.meta.glob("@/<%=(option.dir||'i18n')%>/*.json")
 // console.log(langsImporter)
 // i18n操作类
 class LocaleOperator{
@@ -19,9 +18,6 @@ class LocaleOperator{
       const regs = k.match(/\W([a-zA-Z]+\w+)\.json$/i)
       if(regs&&regs.length>1){
         const lang = regs[1]
-        // if(!options.messages[lang]){
-        //   options.messages[lang] = {}
-        // }
         this.dymicImporters[lang] = [langsImporter[k]]
       }
     }
@@ -32,10 +28,14 @@ class LocaleOperator{
   }
   // 获取当前语言
   getLocale(){
+    let locale = this.i18n.locale
     if(window&&window.localStorage){
-      return localStorage.getItem(this.localeKey)
+      const localLang = localStorage.getItem(this.localeKey)
+      if(localLang && locale!=localLang){
+        locale = localLang
+      }
     }
-    return this.i18n.locale
+    return locale
   }
   // 设置当前语言
   setLocale(lang){
@@ -137,7 +137,9 @@ export default async function(option,Context){
   })
   Context.hook("APP:CREATED",function(){
     // 初始化默认语言
-    localeOperator.loadLocaleMessage(localeOperator.getLocale())
+    const locale = localeOperator.getLocale()
+    localeOperator.loadLocaleMessage(locale)
+    localeOperator.setLocale(locale)
     // 注册router钩子函数来判断语言
     Context.router.beforeEach((to,from,next)=>{
       localeOperator.loadLocaleMessage(localeOperator.i18n.locale).then(next())
