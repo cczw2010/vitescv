@@ -3,7 +3,7 @@
  */
 import Vue from 'vue'
 import VueRouter from "vue-router"
-import getRoutes,{page404} from "$/routes.runtime.js"
+import getRoutes,{page404} from "@cache/routes.runtime.js"
 // 3.1开始 
 Vue.use(VueRouter)
 export default function createRouter () {

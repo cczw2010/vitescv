@@ -2,7 +2,7 @@
 
 import Vue from 'vue'
 import AppComponent from "./App.vue"
-import initModules from "$/modules/index.js"
+import initModules from "@cache/modules/index.js"
 import createRouter from './router.js'
 //@Const 钩子名称
 const HookStatus = {

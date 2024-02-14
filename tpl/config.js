@@ -11,16 +11,18 @@ export default {
   //   targets: ['IE>=11'],
   //   additionalLegacyPolyfills:['regenerator-runtime/runtime'],
   // }
+  // 是否禁止访问项目之外的文件fs.strict
+  fsStrict:false, 
   /****************** 自定义部分 *******************/
   modules:{},
-  //打包时强制外部化的库 
+  // 打包时强制外部化的库 
   external:[],
-  //404页面             
+  // 404页面             
   page404:'/404',
-  //路由动态加载时的loading组件，AppLoading 预设
+  // 路由动态加载时的loading组件，AppLoading 预设
   // componentLoading:'@/view/components/loading.vue',
-  //路由动态加载错误时显示组件，AppError 预设
+  // 路由动态加载错误时显示组件，AppError 预设
   // componentError:'@/view/components/xx',
-  //路由页面显示组件，AppView 预设         
+  // 路由页面显示组件，AppView 预设         
   // compomentRouteView:'@/view/components/xx',
 }

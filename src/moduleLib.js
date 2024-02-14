@@ -3,7 +3,6 @@ import {pathToFileURL} from "url"
 import {normalizePath} from "vite"
 import { dirname,resolve,join} from "path"
 import { existsSync,writeFileSync,mkdirSync,readFileSync} from "fs"
-import { createUnplugin } from 'unplugin'
 import template from "lodash.template"
 
 const require = createRequire(import.meta.url)
@@ -32,51 +31,26 @@ export async function initModules(options){
   moduleMap.clear()
   Object.assign(moduleConfigs,{
     manualChunks: {},
-    linkModulePaths:[], //link等项目外部包的resolve的node_modules目录
-    linkModuleRoots:[],//link等项目外部包的项目根目录
     external: [],
     UIDirs: [],
     UIResolvers:[],
-    alias: {'vue':require.resolve('vue')},
+    alias: {
+      'vue':require.resolve('vue'),
+      'vue-router':require.resolve('vue-router'),
+    },
     optimizeInclude:[],
   })
 
-  // 如果是link的vitescv
-  if(!process.env.__VITESCVROOT.startsWith(process.env.__PROJECTROOT)){
-    moduleConfigs.linkModuleRoots.push(process.env.__VITESCVROOT)
-    moduleConfigs.linkModulePaths.push(resolve(process.env.__VITESCVROOT,'node_modules'))
-  }
   for (let moduleName in moduleOptions) {
-    let moduleIndex = normalizePath(require.resolve(moduleName,{
-      paths:[process.env.__PROJECTROOT]
-    }))
-    let isPackage = !existsSync(resolve(process.env.__PROJECTROOT,moduleName))     //是否安装外部的包，而不是内部文件
-    let isLink = isPackage && !moduleIndex.startsWith(process.env.__PROJECTROOT)   //是否用npm link安装的项目外部测试包
-    if(!moduleIndex){
-      console.error(`[vitescv] [${moduleName}] not exit`)
-      continue
-    }
     try{
-      let sourceDir = getModuleRootPathByIndex(moduleIndex,moduleName,isPackage,isLink)
-      let idx = moduleMap.size
-      let dstName = `module-${idx}.runtime.js`
-      let moduleInfo = {
-        idx,
-        origin:moduleName,
-        option: moduleOptions[moduleName]||{},
-        sourceDir,
-        source:moduleIndex,
-        dstName,
-        isPackage,
-      }
-      moduleMap.set(moduleIndex,moduleInfo)
-
-      moduleConfigs.linkModuleRoots.push(sourceDir)
+      let moduleInfo = generalModuleInfo(moduleName,moduleOptions[moduleName])
+      // console.log(moduleInfo)
+      // package.json alias
+      getDepsAlias(moduleInfo)
       // module index.js
-      let moduleSourceCode = readFileSync(moduleIndex).toString()
-      transformModuleSource(moduleIndex,moduleSourceCode)
-      
-      //config.js
+      let moduleSourceCode = readFileSync(moduleInfo.source).toString()
+      transformModuleSource(moduleInfo.source,moduleSourceCode)
+      // config.js
       let configFile = pathToFileURL(join(moduleInfo.sourceDir,'config.js'))
       // console.log(configFile)
       if(existsSync(configFile)){
@@ -86,10 +60,6 @@ export async function initModules(options){
             console.error(`[${moduleName}] load config file fail!`,e)
             return null
           })
-      }
-      // link的时候要把外部包的地址加到reslove的paths里去
-      if(moduleInfo.isPackage && !moduleInfo.source.startsWith(process.env.__PROJECTROOT)){
-        moduleConfigs.linkModulePaths.push(join(moduleInfo.sourceDir,'node_modules'))
       }
     }catch(e){
       console.debug(e)
@@ -200,21 +170,87 @@ function transformModuleSource(id,code){
   }
 }
 
-// 获取模块的根目录
-function getModuleRootPathByIndex(moduleIndex,moduleName,isPackage,isLink){
-  let dir = dirname(moduleIndex)
-  if(!isPackage){
-    return dir
+// 获取并处理模块的信息
+function generalModuleInfo(moduleName,moduleOption){
+  let moduleIndex = normalizePath(require.resolve(moduleName,{
+    paths:[process.env.__PROJECTROOT]
+  }))
+  if(!moduleIndex){
+    console.error(`[vitescv] [${moduleName}] not exit`)
+    return
   }
-  if(dir){
-    if(isLink){
-      if(!existsSync(resolve(dir,'package.json'))){
-        return getModuleRootPathByIndex(dir,moduleName,isPackage,isLink)
-      }
-    }else if(!dir.endsWith(moduleName)){
-      return getModuleRootPathByIndex(dir,moduleName,isPackage,isLink)
+  let idx = moduleMap.size
+  let dstName = `module-${idx}.runtime.js`
+
+  let sourceDir = dirname(moduleIndex)
+  let isPackage = existsSync(join(sourceDir,'package.json'))     //是否安装外部的包，而不是内部文件
+  let isLink = isPackage && !moduleIndex.startsWith(process.env.__PROJECTROOT)   //是否用npm link安装的项目外部测试包
+
+  const moduleInfo = {
+    idx,
+    origin:moduleName,
+    option: moduleOption||{},
+    sourceDir,
+    source:moduleIndex,
+    dstName,
+    isPackage,
+    isLink
+  }
+  moduleMap.set(moduleInfo.source,moduleInfo)
+  return moduleInfo
+}
+
+// 处理依赖为alias
+function getDepsAlias(moduleInfo){
+  if(!moduleInfo.isPackage){
+    return
+  }
+  const alias = {}
+  try{
+    const json = readFileSync(join(moduleInfo.sourceDir,'package.json')).toString()
+    const packages = JSON.parse(json)
+    for (const dep in packages.dependencies) {
+      const depSource = require.resolve(dep,{
+        paths:getPackageNodemodulePaths(moduleInfo.source)
+      })
+      alias[dep] = getDepSourceDir(dep,depSource)
     }
-    return dir
+    Object.assign(moduleConfigs.alias,alias)
+  }catch(e){
+  }
+}
+
+// @vitescv/pinia /Volumes/data/MyModules/vitescvclidemo/node_modules/.pnpm/@vitescv+pinia@1.0.5_vue@2.7.16/node_modules/@vitescv/pinia/index.js
+// @vitescv/elementui /Volumes/data/MyModules/vitescv/packages/elementui/index.js
+function getPackageNodemodulePaths(moduleIndex){
+  if(moduleIndex.startsWith(process.env.__PROJECTROOT)){
+    return [
+      join(process.env.__PROJECTROOT,'node_modules'),
+      join(process.env.__PROJECTROOT,'node_modules/.pnpm/node_modules')
+    ]
+  }
+  let dir = dirname(moduleIndex)
+  if(dir){
+      if(!existsSync(resolve(dir,'node_modules'))){
+        return getPackageNodemodulePaths(dir)
+      }else{
+        return [
+          join(dir,'node_modules'),
+          join(dir,'node_modules/.pnpm/node_modules')
+        ]
+      }
+  }
+  return []
+}
+
+// 获取某个依赖的根目录,因为有可能会引用该依赖下其他文件所以要去根目录而不是入口文件
+function getDepSourceDir(depName,fpath){
+  let dir = dirname(fpath)
+  if(dir){
+    if(dir.endsWith(depName)){
+      return dir
+    }
+    return getDepSourceDir(depName,dir)
   }
   return null
 }

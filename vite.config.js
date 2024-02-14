@@ -1,6 +1,5 @@
 import { resolve} from "path"
 import { splitVendorChunkPlugin,defineConfig,searchForWorkspaceRoot} from 'vite'
-import {nodeResolve} from "@rollup/plugin-node-resolve"
 import legacy from '@vitejs/plugin-legacy'
 import vue from '@vitejs/plugin-vue2'
 import Components from 'unplugin-vue-components/vite'
@@ -20,11 +19,6 @@ export default function(userConfig){
     const isProduction = mode == "production"
 
     // console.log(moduleConfigs)
-    // const moduleChunks = Object.assign({
-    //   'vue': ['vue'],
-    //   // 'vrouter': ['vue-router','virtual:router-routes'],
-    //   // 'vmodules': ['virtual:modules','virtual:router-routes'],
-    // },Config.manualChunks)
     return {
       //💡 项目根目录
       root:process.env.__PROJECTCACHEROOT,
@@ -42,23 +36,15 @@ export default function(userConfig){
       resolve: {
         alias: Object.assign({
           '@': process.env.__PROJECTROOT,
-          '$': process.env.__PROJECTCACHEROOT,
+          '@cache': process.env.__PROJECTCACHEROOT,
           '@@vitescv': process.env.__VITESCVROOT,
         },Config.alias),
         preserveSymlinks:false,
-        dedupe:["vue"]
+        dedupe:["vue","vue-router"]
       },
       plugins: [
         Config.legacy&&legacy(Config.legacy),
         // Inspect(),
-        nodeResolve({
-          preserveSymlinks:false,
-          // pnpm的话都在node_modules/.pnpm/node_modules下面
-          modulePaths:[
-            'node_modules',
-            'node_modules/.pnpm/node_modules',
-          ].concat(Config.linkModulePaths),
-        }),
         //💡 2.9之前manualChunks默认的策略是将 chunk 分割为 index 和 vendor，之后要手动启动
         splitVendorChunkPlugin(),
         vueOptions([{
@@ -156,8 +142,8 @@ export default function(userConfig){
         // entries:[],
         //💡 默认情况下，不在 node_modules 中的，链接的包不会被预构建。使用此选项可强制预构建链接的包。
         include:Config.optimizeInclude,
-        // 💡 排除的预构建，vitescv/app包含虚拟模块，预构建的时候并不存在，会报错
-        // exclude:[],  //npm link安装的时候不报错，正常里面引用的虚拟模块报错
+        // 💡 排除的预构建，里面包含的routes和modules不能被预构建
+        exclude:["vitescv/app"],
         //💡 设置为 true 可以强制依赖预构建，而忽略之前已经缓存过的、已经优化过的依赖。
         force:false,
         // 只有development的时候才使用兼容插件来处理，因为prodction的时候会走rollup的unpluginvModules.vite 会冲突
@@ -184,10 +170,7 @@ export default function(userConfig){
           interval: 200,
         },
         fs: {
-          allow: [
-            // search up for workspace root
-            searchForWorkspaceRoot(process.env.__PROJECTROOT),
-          ].concat(Config.linkModuleRoots)
+          strict:!!Config.fsStrict,
         },
       },
     }
