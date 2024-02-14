@@ -223,7 +223,8 @@ function getDepsAlias(moduleInfo){
 // @vitescv/pinia /Volumes/data/MyModules/vitescvclidemo/node_modules/.pnpm/@vitescv+pinia@1.0.5_vue@2.7.16/node_modules/@vitescv/pinia/index.js
 // @vitescv/elementui /Volumes/data/MyModules/vitescv/packages/elementui/index.js
 function getPackageNodemodulePaths(moduleIndex){
-  if(moduleIndex.startsWith(process.env.__PROJECTROOT)){
+  // 非pnpm安装的走下面
+  if(moduleIndex.startsWith(process.env.__PROJECTROOT) && moduleIndex.indexOf(".pnpm")>=0){
     return [
       join(process.env.__PROJECTROOT,'node_modules'),
       join(process.env.__PROJECTROOT,'node_modules/.pnpm/node_modules')
