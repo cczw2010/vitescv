@@ -1,13 +1,13 @@
 import { resolve} from "path"
-import { splitVendorChunkPlugin,defineConfig,searchForWorkspaceRoot} from 'vite'
+import { splitVendorChunkPlugin,defineConfig} from 'vite'
 import legacy from '@vitejs/plugin-legacy'
 import vue from '@vitejs/plugin-vue2'
 import Components from 'unplugin-vue-components/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import vueRoutes from "./src/vitePlugins/vite-plugin-vue-routes.js"
-import vueOptions from "./src/vitePlugins/vite-plugin-vue-options.js"
+// import vueOptions from "./src/vitePlugins/vite-plugin-vue-options.js"
 import {initModules} from "./src/moduleLib.js"
-import { layoutNameKey,pageNameKey} from './src/constants.js'
+// import { layoutNameKey,pageNameKey} from './src/constants.js'
 
 // 根据用户配置返回vite.config.js配置
 export default function(userConfig){
@@ -47,15 +47,15 @@ export default function(userConfig){
         // Inspect(),
         //💡 2.9之前manualChunks默认的策略是将 chunk 分割为 index 和 vendor，之后要手动启动
         splitVendorChunkPlugin(),
-        vueOptions([{
-          include:`${Config.source}/pages/**/*.vue`,
-          exclude:null,
-          options:{[pageNameKey]:true},
-        },{
-          include:`${Config.source}/layouts/**/*.vue`,
-          exclude:null,
-          options:{[layoutNameKey]:true},
-        }]),
+        // vueOptions([{
+        //   include:`${Config.source}/pages/**/*.vue`,
+        //   exclude:null,
+        //   options:{[pageNameKey]:true},
+        // },{
+        //   include:`${Config.source}/layouts/**/*.vue`,
+        //   exclude:null,
+        //   options:{[layoutNameKey]:true},
+        // }]),
         vueRoutes({
           pageRoot:`${Config.source}/pages`,
           layoutRoot:`${Config.source}/layouts`,
