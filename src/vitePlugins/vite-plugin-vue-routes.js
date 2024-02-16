@@ -4,8 +4,8 @@ import {parseComponent as parseSFC} from "vue/compiler-sfc"
 import template from "lodash.template"
 import hash from "hash-sum"
 import { normalizePath } from "vite"
-import {parse as acornParse} from "acorn"
-import {walk} from "estree-walker"
+// import parseVueScript from "./acornParser.js"
+import parseVueScript from "./babelParser.js"
 import { layoutNameKey,pageNameKey } from "../constants.js"
 
 const defaultOption = {
@@ -55,7 +55,6 @@ export default function (option) {
     configResolved(resolvedConfig) {
       builder = new RouteModule(option,resolvedConfig)
       // console.log(`${virtualModuleRouteId}>>>>>>>>>>>configResolved:`,resolvedConfig)
-      // 存储最终解析的配置
     },
     configureServer(server) {
       builder.setDevServer(server)
@@ -132,10 +131,8 @@ class RouteModule{
     // normalizePath(`${this.option.layoutRoot}/${result.layout}.vue`),
     const pathObj = pathParse(pagePath)
     try{
-      let sfc = checkSFC(pagePath,false)
       this.layouts.set(pagePath,{
         name:pathObj.name,
-        asyncData:sfc.result.asyncData
       })
       if(reload){
         this.refreshModule()
@@ -163,7 +160,7 @@ class RouteModule{
     // 分析page
     let sfc
     try{
-      sfc = checkSFC(pagePath,false)
+      sfc = checkSFC(pagePath)
       sfc.result.layout = sfc.result.layout||this.option.layoutDefault
     }catch(e){
       console.error(`[app] page route init error:${pagePath}`,e)
@@ -173,13 +170,9 @@ class RouteModule{
     const result = sfc.result
     const _pagePath =  normalizePath(pagePath)
     const _layoutPath = normalizePath(`${this.option.layoutRoot}/${result.layout}${this.option.sfcExt}`)
-    const layout = this.layouts.get(_layoutPath)
+    // const layout = this.layouts.get(_layoutPath)
 
     result.name = result.name||hash(pagePath)
-    result.asyncDataLayout = layout&&layout.asyncData 
-    // csr，asyncData直接干掉,也方便前端处理
-    result.asyncData = false
-    result.asyncDataLayout = false
     
     // reload为false，判断是否变更了数据meta， 变更了照样reload
     const oldRoute = this.routes.get(pagePath)
@@ -239,16 +232,6 @@ class RouteModule{
     if(!isPage && !isLayout){
       return null
     }
-    // build client代码时， 删除asyncData代码，防止前端泄露
-    // console.log('>>>>>transformCode:'this.development)
-    if(!this.development){
-      // 重新分析，防止被其他组件处理过
-      const sfc = checkSFC(source,true)
-      if(sfc.result.asyncData){
-        const pos =  sfc.result.asyncData
-        return source.replace(source.substring(pos[0],pos[1]),'')
-      }
-    }
     return null
   }
   // 遍历加载routes
@@ -271,94 +254,24 @@ class RouteModule{
 
 // 检查page文件，mixin
 // return {source,result}
-function checkSFC(source,isCode){
-  if(!isCode){
-    source = readFileSync(source,"utf-8")
-  }
+function checkSFC(pagePath){
+  const source = readFileSync(pagePath,"utf-8")
   const sfc = parseSFC(source);
-  const result = {layout:false,asyncData:false,head:false,name:false,alias:false}
+  const result = {layout:false,name:false,alias:false}
   // console.debug(sfc)
   // sfc.scriptSetup sfc.customBlocks sfc.errors sfc.cssVars sfc.styles
   if(sfc.script && sfc.script.content){
     // console.log(sfc.script.content)
-    const ast = acornParse(sfc.script.content, {ecmaVersion: 2020,sourceType:'module'})
-    // let s = new MagicString(sfc.script.content)
-    walk(ast, {
-      enter(node, parent, prop, index) {
-        // console.debug(index,prop,node.type,node.key&&node.key.name)
-        // 0 body ExportDefaultDeclaration undefined
-        // null declaration ObjectExpression undefined
-        if(prop=='declaration' && node.type=='ObjectExpression' && parent.type=="ExportDefaultDeclaration"){
-          // console.debug(">>>>>>>>>",node.properties) // [async,head data....]
-          node.properties.forEach((propItem,i) => {
-            // 如果不是最后一个proptype，那么为了包含进去",",结束点为下个proptype之前。
-            switch(propItem.key.name){
-              case "asyncData":
-                const codeEnd = i<node.properties.length-1?node.properties[i+1].start-1:propItem.end
-                result.asyncData = [sfc.script.start+propItem.start,sfc.script.start+codeEnd]
-                // result.asyncData = source.substring(sfc.script.start+propItem.start,sfc.script.start+codeEnd)
-                // s.remove(propItem.start,codeEnd)
-                // console.log(source,sfc.script,result.asyncData)
-                break;
-              case "head":
-                result.head =  true
-                break;
-              case "name":
-                if(propItem.value.type!='Literal'){
-                  console.warn('[app] prop name must be a Literal String:',pagePath)
-                }else{
-                  result.name =  propItem.value.value
-                }
-                break;
-              case "alias":
-                if(propItem.value.type!='Literal' || !propItem.value.value.startsWith("/")){
-                  console.warn('[app] prop alias must be a Literal String also startsWith "/" :\nFile:',pagePath)
-                }else{
-                  result.alias =  propItem.value.value
-                }
-                break;
-              // case "middleware":
-              //   // console.log(propItem.value)
-              //   result.middleware = []
-              //   if(propItem.value.type=='Literal'){
-              //     result.middleware.push(propItem.value.value)
-              //   }else if(propItem.value.type=='ArrayExpression'){
-              //     propItem.value.elements.forEach(eitem => {
-              //       if(eitem.type=='Literal'){
-              //         result.middleware.push(eitem.value)
-              //       }
-              //     });
-              //   }
-              //   break;
-              case "layout":
-                if(propItem.value.type!='Literal'){
-                  console.warn('[app] layout must be a Literal String :\nFile:',pagePath)
-
-                }else{
-                  result.layout = propItem.value.value
-                }
-                break;
-              //默认自动收集其他字面量属性 ,便于用户扩展
-              // {type: "Literal"; value: string | boolean | null | number | RegExp;}
-              default:
-                if(propItem.value.type=='Literal'){
-                  result[propItem.key.name] = propItem.value.value
-                }
-                break;
-            }
-          });
-          this.skip()
-        }
-      },
-      // leave(node, parent, prop, index) {
-      // }
-    })
+    const parseResult = parseVueScript(sfc.script.content,pagePath)
+    // console.log(JSON.stringify(ast, null, 2));
+    Object.assign(result,parseResult)
   }
   return {result,source}
 }
 
 
 // 获取某个对象某个属性的内容
+// let s = new MagicString(sfc.script.content)
 // function getPropNodeCode(magicstring,node){
 //   if(node.shorthand){
 //     // TODO get the origin code

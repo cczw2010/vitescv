@@ -32,6 +32,8 @@
     "vite.config.js"
   ],
   "dependencies": {
+    "@babel/core": "^7.23.9",
+    "@babel/parser": "^7.23.9",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@vitejs/plugin-legacy": "^5.2.0",
     "@vitejs/plugin-vue2": "^2.3.1",
