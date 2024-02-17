@@ -38,7 +38,7 @@ export default function(userConfig){
           '@@vitescv': process.env.__VITESCVROOT,
         },Config.alias),
         preserveSymlinks:false,
-        dedupe:["vue","vue-router"],
+        dedupe:["vue","vue-router"].concat(Object.keys(Config.alias)),
         // extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json']
       },
       plugins: [
