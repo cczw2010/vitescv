@@ -1,0 +1,13 @@
+{
+  "name": "@vitescv/axios",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "description": "axios module for vitescv",
+  "dependencies": {
+    "axios": "^1.6.7"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
