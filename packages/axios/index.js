@@ -8,7 +8,7 @@ export default function(config,Context){
   Context.hook("APP:INIT",function(options) {
     // 💡对外公开提供全局方法
     Context.axios = instance
-    Object.defineProperty(Context.Vue,'$axios',{
+    Object.defineProperty(Context.Vue.prototype,'$axios',{
       get(){
         return instance
       }
