@@ -12,8 +12,5 @@
   "license": "ISC",
   "dependencies": {
     "vue-meta": "^2.4.0"
-  },
-  "devDependencies": {
-    "vue": "^2.7.14"
   }
 }

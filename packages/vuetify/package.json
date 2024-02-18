@@ -12,8 +12,7 @@
   },
   "devDependencies": {
     "sass": "~1.32",
-    "sass-loader": "^13.3.2",
-    "vue": "^2.7.14"
+    "sass-loader": "^13.3.2"
   },
   "peerDependencies": {
     "vitescv":"^2.0.0",
