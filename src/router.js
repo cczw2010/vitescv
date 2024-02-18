@@ -1,10 +1,6 @@
-/**
- * 完成第一次服务器端渲染 route则被前端接管
- */
 import Vue from 'vue'
 import VueRouter from "vue-router"
 import getRoutes,{page404} from "@cache/routes.runtime.js"
-// 3.1开始 
 Vue.use(VueRouter)
 export default function createRouter () {
   const routes = getRoutes()

@@ -79,7 +79,7 @@ view/components   #自动加载的单文件组件路径
 
 ### page
 
-vue的sfc文件，文件路径则是路由访问路径
+vue的sfc文件，文件路径则是路由访问路径,不支持组合式API
 
 ```js
 <template>
@@ -119,7 +119,7 @@ created(){
 ### layout
 
 不支持多级目录，自动根据`page`的设定加载。  内部使用 `app-view` 组件指定页面渲染的位置。并且在跳转的地方需要
-可以增加`transition`或者`keep-alive` 来定制显示效果。
+可以增加`transition`或者`keep-alive` 来定制显示效果。不支持组合式API
 
 ```js
 <template>
@@ -240,7 +240,7 @@ export default function(option,context){
 
 }
 ```
-模块支持有限的修改用户项目配置文件，字需要在同目录下需要提供一个`config.js`.
+模块支持有限的修改用户项目开发和编译阶段的配置文件，字需要在同目录下需要提供一个`config.js`.
 ```js
 //💡 modules/xxx/config.js
 export default {

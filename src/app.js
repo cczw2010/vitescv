@@ -52,7 +52,7 @@ function hookInit(){
   // 合并各模块
   for (const hookfunc of Hooks[HookStatus.INIT]) {
     const options = {}
-    hookfunc.call(null,options)
+    hookfunc.call(Context,options)
     for(let k in options){
       let v = options[k]
       switch (k) {
