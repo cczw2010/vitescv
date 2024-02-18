@@ -25,16 +25,14 @@ modules:{
 ```
 
 
-配置后在应用的上下文`context`中提供了`Pinia`对象，方便其他模块使用：
+配置后在应用的上下文`Context`中提供了`Pinia`对象，和vue示例中的`this.Pinia`方便其他模块使用，API如下:
 
 ```js
-// context.Pinia
-{
-  pinia,        //当前pinia实例
-  stores,       //所有预设的store的初始化方法
-  /**---- 以下是Pinia的自有API------**/
-  defineStore,mapState,mapActions,mapWritableState,mapStores
-}
+// 
+pinia,             //当前pinia实例 ,一般在模块中app未初始化时，配合useStore用
+getUseStore(),    //获取某个配置中预设的store的useStore方法
+/**---- 以下是Pinia的自有API------**/
+defineStore,mapState,mapActions,mapWritableState,mapStores,
 ```
 
 
@@ -53,6 +51,12 @@ export default {
   },
   persist: true,     //开启持久化
 }
-// 激活了使用
-const store = context.Pinia.stores.user()
+// 模块中使用
+const useUserStore = context.Pinia.stores.user
+// 页面中使用
+const useUserStore = this.Pinia.getUseStore('user')
+
+const userStore = useUserStore()
+
+
 ```

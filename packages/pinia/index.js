@@ -5,12 +5,18 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 <%for(let k in option){%>
 import store_<%=k%> from "<%=utils.normalizePath(utils.resolve(option[k]))%>"
 <%}%>
-const stores = {}
+const useStores = {}
 <%for(let k in option){%>
-stores.<%=k%> = defineStore('<%=k%>',store_<%=k%>)
+useStores.<%=k%> = defineStore('<%=k%>',store_<%=k%>)
 <%}%>
 <%}%>
-  
+
+const Pinia = {
+  getUseStore(storeName) {
+    return useStores[storeName]
+  },
+  defineStore,mapState,mapActions,mapWritableState,mapStores
+}
 
 // option 是 store的名称和地址的键值对对象
 export default async function(option,Context){
@@ -20,12 +26,17 @@ export default async function(option,Context){
     const pinia = createPinia()
     // 持久化
     pinia.use(piniaPluginPersistedstate)
-    // 对外提供
-    Context.Pinia = {
-      defineStore,mapState,mapActions,mapWritableState,mapStores,
-      pinia,        //当前实例
-      stores
-    }
+
+    // 对外提供 API
+    Pinia.pinia = pinia
+    Context.Vue.prototype.Pinia = Pinia
+    Context.Pinia =Pinia
+
+    // init
     options.pinia = pinia
   })
+}
+
+function injectVue(Vue){
+ 
 }
