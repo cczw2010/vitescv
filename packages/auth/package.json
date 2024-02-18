@@ -1,13 +1,15 @@
 {
   "name": "@vitescv/auth",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "type": "module",
   "main": "index.js",
   "description": "auth module for vitescv & vue2.7",
   "dependencies": {
   },
-  "devDependencies": {
-    "vue": "^2.7.14"
+  "peerDependencies": {
+    "vitescv":"^2.1.2",
+    "@vitescv/pinia":"^1.0.7",
+    "@vitescv/axios":"^1.0.0"
   },
   "publishConfig": {
     "access": "public"
