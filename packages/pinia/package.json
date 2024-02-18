@@ -1,6 +1,6 @@
 {
   "name": "@vitescv/pinia",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "description": "pinia module for vitescv",
   "type": "module",
   "main": "index.js",
@@ -10,11 +10,14 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "vue": "^2.7.14"
-  },
   "dependencies": {
     "pinia": "^2.0.33",
     "pinia-plugin-persistedstate": "^3.2.0"
+  },
+  "devDependencies": {
+    "vue": "^2.7.14"
+  },
+  "peerDependencies": {
+    "vitescv":"^2.1.2"
   }
 }

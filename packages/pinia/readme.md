@@ -31,8 +31,9 @@ modules:{
 // context.Pinia
 {
   pinia,        //当前pinia实例
-  defineStore,  //pinia的defineStore可自定义store
   stores,       //所有预设的store的初始化方法
+  /**---- 以下是Pinia的自有API------**/
+  defineStore,mapState,mapActions,mapWritableState,mapStores
 }
 ```
 
