@@ -2,13 +2,15 @@
  * 基于mockjs的前端api拦截器，模板使用参考https://github.com/lavyun/better-mock
  */
 import Mockjs from "better-mock"
-const initMocks = import.meta.glob('@/<%=(option.mockDir||"mock")%>/*.js',{ import: 'default',eager: true})
+const importers = import.meta.glob('@/<%=(option.mockDir||"mock")%>/*.js',{ import: 'default',eager: false})
 Mockjs.setup({
   timeout:'<%=(option.timeout||"500-1500")%>'
 })
-export default function(){
-  Object.values(initMocks).forEach(initMock=>{
-    const mockDatas = initMock(Mockjs)
+
+export default async function(){
+  for(const importer of Object.values(importers)){
+    const initModule = await importer()
+    const mockDatas = initModule(Mockjs)
     if(Array.isArray(mockDatas)){
       mockDatas.forEach(data=>{
         if(data.rurl&&data.body){
@@ -20,5 +22,5 @@ export default function(){
         }
       })
     }
-  })
+  }
 }
