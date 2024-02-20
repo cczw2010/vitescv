@@ -7,9 +7,23 @@ import AutoImport from 'unplugin-auto-import/vite'
 import vueRoutes from "./src/vitePlugins/vite-plugin-vue-routes.js"
 import {initModules} from "./src/moduleLib.js"
 
+const defaultUserConfig = {
+  host:"127.0.0.1",
+  source:"view",                //vue项目的源码目录
+  outDir:'dist',                //打包输出根路径
+  public:"public",              //资源文件目录名，同vite配置
+  legacy:false,
+  modules:{},
+  external:[],
+  page404:'/404',
+}
 // 根据用户配置返回vite.config.js配置
 export default function(userConfig){
   return defineConfig(async ({ command, mode, ssrBuild }) => {
+    if(typeof userConfig == 'function'){
+      userConfig = userConfig({ command, mode, ssrBuild })
+    }
+    userConfig = Object.assign({},defaultUserConfig,userConfig)
     // const env = loadEnv(mode, process.cwd(), '')
     const moduleConfigs =  await initModules(userConfig.modules)
     const Config = Object.assign({},userConfig,moduleConfigs)

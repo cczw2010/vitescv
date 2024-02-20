@@ -42,8 +42,13 @@ export async function initModules(options){
   })
 
   for (let moduleName in moduleOptions) {
+    const moduleOption = moduleOptions[moduleName]
+    // 跳过设置成false的模块
+    if(moduleOption===false){
+      continue
+    }
     try{
-      let moduleInfo = generalModuleInfo(moduleName,moduleOptions[moduleName])
+      let moduleInfo = generalModuleInfo(moduleName,moduleOption)
       // console.log(moduleInfo)
       // package.json alias
       getDepsAlias(moduleInfo)
@@ -184,7 +189,6 @@ function generalModuleInfo(moduleName,moduleOption){
 
   let sourceDir = dirname(moduleIndex)
   let isPackage = existsSync(join(sourceDir,'package.json'))     //是否安装外部的包，而不是内部文件
-  let isLink = isPackage && !moduleIndex.startsWith(process.env.__PROJECTROOT)   //是否用npm link安装的项目外部测试包
 
   const moduleInfo = {
     idx,
@@ -193,8 +197,7 @@ function generalModuleInfo(moduleName,moduleOption){
     sourceDir,
     source:moduleIndex,
     dstName,
-    isPackage,
-    isLink
+    isPackage
   }
   moduleMap.set(moduleInfo.source,moduleInfo)
   return moduleInfo
