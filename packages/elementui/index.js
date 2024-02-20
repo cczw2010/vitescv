@@ -1,5 +1,5 @@
 /**
- * Element-ui for vitescv & vue2
+ * Element-ui for vitescv & vue2  2.1.0开始全局导入
  * 配置信息可选，主要是设置多语言，依赖于vue-i18n 如下
  * @param option
  *  {
@@ -8,11 +8,13 @@
  *      'en':'en',
  *      'zh':'zh-CN'
  *    },
- *    // unplugin-vue-components/resolvers  ，ElementUiResolver 的参数
- *    resolver:{}  
+ *    size: 'small',
+ *    zIndex: 2000
  *  }
  */
+import ElementUI from 'element-ui'
 import localElement from 'element-ui/lib/locale'
+import 'element-ui/lib/theme-chalk/index.css'
 const importers = {
 <%if(option.langs){%>
 <%for(let lang in option.langs){%>
@@ -21,6 +23,7 @@ const importers = {
 <%}%>
 }
 export default function(option,Context){
+  Context.Vue.use(ElementUI,option)
   Context.I18n.setLocaleMessages(importers)
   
   Context.hook("APP:INIT",function(options) {

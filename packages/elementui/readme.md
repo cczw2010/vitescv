@@ -1,6 +1,8 @@
 ### 简介
 
-vitescv的elementui自动导入模块，多语言切换依赖于`@vitescv/i18n`
+vitescv的elementui自动导入模块，多语言切换依赖于`@vitescv/i18n`.
+
+`@2.1.0`开始调整为全局导入，更加好用
 
 
 ### 安装
@@ -22,8 +24,9 @@ modules:{
       'zh':'zh-CN',
       ...
     },
-    // ElementUiResolverOptions
-    "resolver":{}
+    // ElementUi 全局配置
+    size: 'small',
+    zIndex: 2000
   },
 }
 ```
