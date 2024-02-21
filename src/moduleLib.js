@@ -113,13 +113,27 @@ function tidyModuleConfig(moduleConfig,moduleOption){
 
 // 生成模块入口运行时文件
 function transformModuleIndexSource(){
-  let compiler  = template(`
-  <%for(let i=0;i<modules.length ;i++){%>
-  import vmodule_<%=modules[i].idx%> from './module-<%=modules[i].idx%>.runtime.js'
-  <%}%>
+  // let compiler  = template(`
+  // <%for(let i=0;i<modules.length ;i++){%>
+  // import vmodule_<%=modules[i].idx%> from './module<%=modules[i].idx%>.js'
+  // <%}%>
+  // export default async function(App){
+  // <%for(let module of modules){%>
+  //   await initModule(vmodule_<%=module.idx%>,<%=JSON.stringify(module.option)%>,App)
+  // <%}%>
+  // }
+  // async function initModule(func,option,App){
+  //   if(func.toString().startsWith("async")){
+  //     await func(option,App)
+  //   }else{
+  //     func(option,App)
+  //   }
+  // }`)
+  let compiler = template(`
   export default async function(App){
-  <%for(let module of modules){%>
-    await initModule(vmodule_<%=module.idx%>,<%=JSON.stringify(module.option)%>,App)
+  <%for(let i=0;i<modules.length ;i++){%>
+    const vmodule_<%=modules[i].idx%> = await import('./module<%=modules[i].idx%>.js').then(m=>m.default)
+    await initModule(vmodule_<%=modules[i].idx%>,<%=JSON.stringify(modules[i].option)%>,App)
   <%}%>
   }
   async function initModule(func,option,App){
@@ -185,7 +199,7 @@ function generalModuleInfo(moduleName,moduleOption){
     return
   }
   let idx = moduleMap.size
-  let dstName = `module-${idx}.runtime.js`
+  let dstName = `module${idx}.js`
 
   let sourceDir = dirname(moduleIndex)
   let isPackage = existsSync(join(sourceDir,'package.json'))     //是否安装外部的包，而不是内部文件
