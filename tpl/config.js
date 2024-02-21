@@ -17,6 +17,8 @@ export default {
   modules:{},
   // 打包时强制外部化的库 
   external:[],
+  // 打包时manualChunks的映射数组集合 [[/\/mock\//,'mock],...]
+  trunkRules:[],
   // 404页面             
   page404:'/404',
   // 路由动态加载时的loading组件，AppLoading 预设

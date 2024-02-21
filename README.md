@@ -44,8 +44,10 @@ source:"view",                           // vue项目的源码目录
 outDir:'dist',                           // 打包输出根路径
 // 编译时的兼容设置，设置为false可关闭。具体参考@vitejs/plugin-legacy的参数设置
 legacy:{},
-// 强制外部化的库
-external:['vue'],                         //打包时强制外部化的库，默认空
+// 打包时强制外部化的库，默认空
+external:['vue'], 
+// [^2.1.4]打包时manualChunks的规则映射数组集合，eg: [[RegExp,'name'],...]
+trunkRules:[],														
 /****************** 自定义部分 *******************/
 //自定义模块
 modules:[

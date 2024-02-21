@@ -15,6 +15,7 @@ const defaultUserConfig = {
   legacy:false,
   modules:{},
   external:[],
+  trunkRules:[],
   page404:'/404',
 }
 // 根据用户配置返回vite.config.js配置
@@ -23,7 +24,7 @@ export default function(userConfig){
     if(typeof userConfig == 'function'){
       userConfig = userConfig({ command, mode, ssrBuild })
     }
-    userConfig = Object.assign({},defaultUserConfig,userConfig)
+    userConfig = mergeUserConfig(userConfig)
     // const env = loadEnv(mode, process.cwd(), '')
     const moduleConfigs =  await initModules(userConfig.modules)
     const Config = Object.assign({},userConfig,moduleConfigs)
@@ -58,7 +59,7 @@ export default function(userConfig){
       plugins: [
         Config.legacy&&legacy(Config.legacy),
         // Inspect(),
-        //💡 2.9之前manualChunks默认的策略是将 chunk 分割为 index 和 vendor，之后要手动启动
+        //💡 2.9之后manualChunks需要
         splitVendorChunkPlugin(),
         vueRoutes({
           pageRoot:`${Config.source}/pages`,
@@ -112,12 +113,6 @@ export default function(userConfig){
         //💡 模块预加载，对于ssr很重要
         modulePreload: {
           polyfill: true,
-          // resolveDependencies: (filename, deps, { hostId, hostType }) => {
-          //   console.log(">>>>>>>.resolveDependencies:",filename,hostId,hostType,deps)
-          //   // if(hostType=='js')
-          //   //！定制预渲染模块列表，
-          //   return deps
-          // }
         },
         ssr:false,
         commonjsOptions:{
@@ -127,14 +122,10 @@ export default function(userConfig){
           input: resolve(process.env.__PROJECTCACHEROOT,'index.html'),
           external:Config.external,
           output: {
-            // assetFileNames: (assetInfo) => {
-            //   // console.log(assetInfo)
-            //   return `${assetsDir}/[name]-[hash].[ext]`; // 不匹配的资源文件存放至assets，以[name]-[hash].[ext]命名规则，注意两处的命名规则不同
-            // },    
-            // manualChunks(id, { getModuleInfo }) {
-            //   // console.log(id,getModuleInfo(id))
-            //   if(id.includes('node_modules')){
-            // },
+            entryFileNames: 'entries/[name].js',
+            chunkFileNames: 'chunks/[name]-[hash].js',
+            assetFileNames: 'static/[name]-[hash][extname]',
+            manualChunks:generalManualChunks(userConfig.trunkRules)
           },
         },
         //💡 览器兼容目标,使用plugin-legacy 就不用设置了
@@ -180,4 +171,53 @@ export default function(userConfig){
       },
     }
   })
+}
+
+// 生成用户 config
+function mergeUserConfig(userConfig){
+  const config = Object.assign({},defaultUserConfig)
+  for (const key in userConfig) {
+    switch(key){
+      case 'trunkRules':
+        // 处理掉非正则的和不是数组的对象
+        if(!Array.isArray(userConfig.trunkRules)){
+          console.error("[vitescv] [config.trunkRules]  must be Array, ignored!")
+        }else{
+          userConfig.trunkRules.forEach((rule,i) => {
+            if(!Array.isArray(rule)||rule.length<1){
+              console.error(`[vitescv] [config.trunkRules.${i} must be Array, ignored!`)
+            }else{
+              if(Object.prototype.toString.call(rule[0]) !== '[object RegExp]'){
+                console.error(`[vitescv] [config.trunkRules.${i}.0] the first item in rule must be RegExp, ignored!`)
+              }else{
+                if(rule.length>1 && rule[1]!==null && typeof rule[1]!=="string"){
+                  console.error(`[vitescv] [config.trunkRules.${i}.1] the second item in rule must be String|Null, ignored!`)
+                }else{
+                  config.trunkRules.push(rule)
+                }
+              }
+            }
+          })
+        }
+        break;
+      default:
+        config[key] = userConfig[key]
+        break;
+    }
+  }
+  return config
+}
+
+// 生辰manualChunks对应的处理方法
+function generalManualChunks(trunkRules){
+  if(trunkRules.length==0){
+    return null
+  }
+  return function(id){
+    for (let i = 0; i < trunkRules.length; i++) {
+      if(trunkRules[i][0].test(id)){
+        return trunkRules[i][1]
+      }
+    }
+  }
 }
