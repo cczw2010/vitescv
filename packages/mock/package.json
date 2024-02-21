@@ -1,6 +1,6 @@
 {
   "name": "@vitescv/mock",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "mockjs for vitescv",
   "main": "index.js",
   "scripts": {
